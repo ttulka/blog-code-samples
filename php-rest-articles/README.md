@@ -1,4 +1,4 @@
-# Articles PHP Restful API Microservice
+# Articles - PHP Restful API Microservice
 
 ## Installation
 

@@ -3,7 +3,7 @@ include_once 'Database.php';
 
 class DatabaseMySql implements Database {
     
-    public $conn;
+    private $conn;
     
     function __construct($host, $db, $username, $password) {
         try {
