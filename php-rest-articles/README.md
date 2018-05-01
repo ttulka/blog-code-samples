@@ -67,14 +67,14 @@ INSERT INTO `blog`.`articles` (`id`, `title`, `summary`, `body`, `createdAt`, `c
 ### List articles
 ```
 curl -X GET http://localhost/articles.php
-curl -X GET http://localhost/articles.php?categoryId=123
-curl -X GET http://localhost/articles.php?authorId=123
-curl -X GET http://localhost/articles.php?categoryId=123&authorId=123
+curl -X GET http://localhost/articles.php?categoryId=1
+curl -X GET http://localhost/articles.php?authorId=1
+curl -X GET http://localhost/articles.php?categoryId=1&authorId=1
 ```
 
 ### Show an article
 ```
-curl -X GET http://localhost/articles.php?id=123
+curl -X GET http://localhost/articles.php?id=1
 ```
 
 ### Create a new article
