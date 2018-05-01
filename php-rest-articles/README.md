@@ -66,19 +66,19 @@ INSERT INTO `blog`.`articles` (`id`, `title`, `summary`, `body`, `createdAt`, `c
 
 ### List articles
 ```
-curl -X GET http://localhost/articles.php
-curl -X GET http://localhost/articles.php?categoryId=1
-curl -X GET http://localhost/articles.php?authorId=1
-curl -X GET http://localhost/articles.php?categoryId=1&authorId=1
+curl http://localhost/articles.php
+curl http://localhost/articles.php?categoryId=1
+curl http://localhost/articles.php?authorId=1
+curl http://localhost/articles.php?categoryId=1&authorId=1
 ```
 
 ### Show an article
 ```
-curl -X GET http://localhost/articles.php?id=1
+curl http://localhost/articles.php?id=1
 ```
 
 ### Create a new article
-`post.dat`
+`post.json`
 ```
 { "title": "New article", 
   "summary": "Lorem ipsum", 
@@ -88,12 +88,12 @@ curl -X GET http://localhost/articles.php?id=1
   "authorId": 1 }
 ```
 ```
-curl -v http://localhost/articles.php -X POST -H "Content-Type: application/json" -d @post.dat
+curl http://localhost/articles.php -X POST -H "Content-Type: application/json" -d @post.json
 {"id":4}
 ```
 
 ### Update an article
-`put.dat`
+`put.json`
 ```
 { "title": "Updated article", 
   "summary": "Lorem ipsum", 
@@ -103,7 +103,7 @@ curl -v http://localhost/articles.php -X POST -H "Content-Type: application/json
   "authorId": 1 }
 ```
 ```
-curl http://localhost/articles.php?id=4 -X PUT -H "Content-Type: application/json" -d @put.dat
+curl http://localhost/articles.php?id=4 -X PUT -H "Content-Type: application/json" -d @put.json
 ```
 
 ### Delete an article
