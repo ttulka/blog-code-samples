@@ -66,15 +66,15 @@ INSERT INTO `blog`.`articles` (`id`, `title`, `summary`, `body`, `createdAt`, `c
 
 ### List articles
 ```
-curl http://localhost/articles.php
-curl http://localhost/articles.php?categoryId=1
-curl http://localhost/articles.php?authorId=1
-curl http://localhost/articles.php?categoryId=1&authorId=1
+curl http://localhost/articles
+curl http://localhost/articles?categoryId=1
+curl http://localhost/articles?authorId=1
+curl http://localhost/articles?categoryId=1&authorId=1
 ```
 
 ### Show an article
 ```
-curl http://localhost/articles.php?id=1
+curl http://localhost/articles/1
 ```
 
 ### Create a new article
@@ -88,7 +88,7 @@ curl http://localhost/articles.php?id=1
   "authorId": 1 }
 ```
 ```
-curl http://localhost/articles.php -X POST -H "Content-Type: application/json" -d @post.json
+curl http://localhost/articles -X POST -H "Content-Type: application/json" -d @post.json
 {"id":4}
 ```
 
@@ -103,10 +103,10 @@ curl http://localhost/articles.php -X POST -H "Content-Type: application/json" -
   "authorId": 1 }
 ```
 ```
-curl http://localhost/articles.php?id=4 -X PUT -H "Content-Type: application/json" -d @put.json
+curl http://localhost/articles/4 -X PUT -H "Content-Type: application/json" -d @put.json
 ```
 
 ### Delete an article
 ```
-curl http://localhost/articles.php?id=4 -X DELETE
+curl http://localhost/articles/4 -X DELETE
 ```
