@@ -82,15 +82,15 @@ switch ($_SERVER['REQUEST_METHOD']) {
 // ///////// HELPER FUNCTIONS //////////////////////////////////////////////////////////////////////// 
 
 function parseRequestData() {
-  $contentType = explode(';', $_SERVER['CONTENT_TYPE']); // Check all available Content-Type
-  $rawBody = file_get_contents('php://input'); // Read body
-  $data = array(); // Initialize default data array
+  $contentType = explode(';', $_SERVER['CONTENT_TYPE']);
+  $rawBody = file_get_contents('php://input');
+  $data = array();
   
-  if (in_array('application/json', $contentType)) { // Check if Content-Type is JSON
-    $data = json_decode($rawBody, true); // Then decode it
+  if (in_array('application/json', $contentType)) {
+    $data = json_decode($rawBody, true);
     
   } else {
-    parse_str($data, $data); // If not JSON, just do same as PHP default method
+    parse_str($data, $data);
   }
   
   return $data;

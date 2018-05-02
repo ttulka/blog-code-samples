@@ -10,9 +10,9 @@ class ArticleRepoPDO implements ArticleRepo {
  
     private $conn;
     
-    private $articles_table = "articles";
-    private $articles_categories_table = "categories";
-    private $authors_table = "authors";
+    private $articles_table = 'articles';
+    private $articles_categories_table = 'categories';
+    private $authors_table = 'authors';
   
     public function __construct(PDO $conn){                                           
         $this->conn = $conn;
