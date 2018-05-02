@@ -1,5 +1,7 @@
 <?php
-include_once 'infrastructure/ArticleRepo.php';
+namespace articles;
+
+require_once __DIR__ . '/../domain/ArticleRepo.php';
 
 class ArticleController {
 

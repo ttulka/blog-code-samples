@@ -1,11 +1,13 @@
 <?php
+namespace articles;
+
 header("Access-Control-Allow-Origin: *");
 header("Content-Type: application/json; charset=UTF-8");
   
-include_once 'config/db.config.php';
-include_once 'infrastructure/db/DatabaseFactory.php';
-include_once 'infrastructure/ArticleRepoPDO.php';
-include_once 'application/ArticleController.php';
+require_once __DIR__ . '/config/db.config.php';
+require_once __DIR__ . '/application/ArticleController.php';
+require_once __DIR__ . '/infrastructure/ArticleRepoPDO.php';
+require_once __DIR__ . '/infrastructure/db/DatabaseFactory.php';
 
 $db = DatabaseFactory::getDatabase(DB_TYPE, DB_HOST, DB_NAME, DB_USER, DB_PASS);
 

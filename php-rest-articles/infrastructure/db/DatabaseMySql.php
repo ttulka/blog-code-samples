@@ -1,5 +1,9 @@
 <?php
-include_once 'Database.php';
+namespace articles;
+
+use \PDO;
+
+require_once __DIR__ . '/Database.php';
 
 class DatabaseMySql implements Database {
     

@@ -1,5 +1,7 @@
 <?php
-include_once 'DatabaseMySql.php';
+namespace articles;
+
+require_once __DIR__ . '/DatabaseMySql.php';
 
 class DatabaseFactory {
   

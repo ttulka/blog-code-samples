@@ -1,4 +1,6 @@
 <?php
+namespace articles;
+
 class Article {
  
     public $id;

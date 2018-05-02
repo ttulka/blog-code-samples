@@ -1,6 +1,10 @@
 <?php
-include_once 'domain/Article.php';
-include_once 'domain/ArticleRepo.php';
+namespace articles;
+
+use \PDO;
+
+require_once __DIR__ . '/../domain/Article.php';
+require_once __DIR__ . '/../domain/ArticleRepo.php';
 
 class ArticleRepoPDO implements ArticleRepo {
  

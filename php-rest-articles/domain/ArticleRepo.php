@@ -1,5 +1,7 @@
 <?php
-include_once 'Article.php';
+namespace articles;
+
+require_once __DIR__ . '/Article.php';
 
 interface ArticleRepo {
  
