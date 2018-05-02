@@ -4,21 +4,24 @@ header("Content-Type: application/json; charset=UTF-8");
   
 include_once 'config/db.config.php';
 include_once 'infrastructure/db/DatabaseFactory.php';
-include_once 'infrastructure/ArticleRepoImpl.php';
+include_once 'infrastructure/ArticleRepoPDO.php';
+include_once 'application/ArticleController.php';
 
 $db = DatabaseFactory::getDatabase(DB_TYPE, DB_HOST, DB_NAME, DB_USER, DB_PASS);
 
-$repo = new ArticleRepoImpl($db->getConnection());
+$repo = new ArticleRepoPDO($db->getConnection());
+
+$controller = new ArticleController($repo);
 
 $response = null;
 
 switch ($_SERVER['REQUEST_METHOD']) {  
   case 'GET':
     if (isset($_GET['id'])) {
-      $response = detailRequest($_GET, $repo);
+      $response = $controller->detailRequest($_GET['id']);
       
     } else {
-      $response = listRequest($_GET, $repo);
+      $response = $controller->listRequest($_GET);
     }
     if ($response === null) {
       http_response_code(404);
@@ -30,7 +33,7 @@ switch ($_SERVER['REQUEST_METHOD']) {
     
   case 'POST':
     $_DATA = parseRequestData();
-    $response = createRequest($_DATA, $repo);
+    $response = $controller->createRequest($_DATA);
     
     if ($response === false) {
       http_response_code(400);       
@@ -48,7 +51,7 @@ switch ($_SERVER['REQUEST_METHOD']) {
     }
   
     $_DATA = parseRequestData();
-    $response = updateRequest($_GET['id'], $_DATA, $repo);
+    $response = $controller->updateRequest($_GET['id'], $_DATA);
     
     if ($response === false) {
       http_response_code(404);
@@ -62,7 +65,7 @@ switch ($_SERVER['REQUEST_METHOD']) {
       echo json_encode(array('error' => 'Missing "id" parameter.'));
     }
     
-    $response = deleteRequest($_GET['id'], $repo);
+    $response = $controller->deleteRequest($_GET['id']);
     
     if ($response === false) {
       http_response_code(404);
@@ -74,80 +77,7 @@ switch ($_SERVER['REQUEST_METHOD']) {
     throw new Exception('HTTP method not supported: ' . $_SERVER['REQUEST_METHOD']);
 }
 
-// ////////// PROCESSING FUNCTIONS ///////////////////////////////////////////////////////////////////
-
-/**
- * Get Article Detail.
- */ 
-function detailRequest($params, $repo) {
-  $article = $repo->fetchOne($params['id']);
-  
-  return $article;
-}
-
-/**
- * List Articles.
- */ 
-function listRequest($params, $repo) {
-  $limit = 10;
-  
-  $categoryId = getIfSet($params, 'categoryId');   
-  $authorId = getIfSet($params, 'authorId');   
-  $page = getIfSet($params, 'page', 0);
-  
-  $articles = $repo->fetchAll($categoryId, $authorId, $page * $limit, $limit);
-  
-  return $articles;
-}
-
-/**
- * Create a New Article.
- */ 
-function createRequest($params, $repo) {
-  $article = new Article();
-  $article->title = $params['title'];
-  $article->summary = $params['summary'];
-  $article->body = $params['body'];
-  $article->createdAt = $params['createdAt'];
-  $article->categoryId = (int)$params['categoryId'];
-  $article->authorId = (int)$params['authorId'];
-  
-  if (!$article->title || !$article->summary || !$article->body || !$article->createdAt || !$article->categoryId || !$article->authorId) {
-    return array('error' => 'Incorrect payload.');
-  }
-  
-  $article = $repo->create($article);
-  
-  return array('id' => (int)$article->id);
-}
-
-/**
- * Update an Article.
- */ 
-function updateRequest($id, $params, $repo) {
-  $article = new Article();
-  $article->title = $params['title'];
-  $article->summary = $params['summary'];
-  $article->body = $params['body'];
-  $article->createdAt = $params['createdAt'];
-  $article->categoryId = (int)$params['categoryId'];
-  $article->authorId = (int)$params['categoryId'];
-  
-  return $repo->update($id, $article);
-}
-
-/**
- * Delete an Article.
- */ 
-function deleteRequest($id, $repo) {  
-  return $repo->delete($id);
-}
-
-// ///////// HELPER FUNCTIONS ////////////////////////////////////////////////////////////////////////
-
-function getIfSet($params, $var, $def = null) {
-  return isset($params[$var]) ? $params[$var] : $def;
-} 
+// ///////// HELPER FUNCTIONS //////////////////////////////////////////////////////////////////////// 
 
 function parseRequestData() {
   $contentType = explode(';', $_SERVER['CONTENT_TYPE']); // Check all available Content-Type

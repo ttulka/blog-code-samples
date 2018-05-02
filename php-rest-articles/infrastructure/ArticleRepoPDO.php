@@ -1,8 +1,8 @@
 <?php
-include_once 'model/Article.php';
-include_once 'model/ArticleRepo.php';
+include_once 'domain/Article.php';
+include_once 'domain/ArticleRepo.php';
 
-class ArticleRepoImpl implements ArticleRepo {
+class ArticleRepoPDO implements ArticleRepo {
  
     private $conn;
     
@@ -10,7 +10,7 @@ class ArticleRepoImpl implements ArticleRepo {
     private $articles_categories_table = "categories";
     private $authors_table = "authors";
   
-    public function __construct($conn){                                           
+    public function __construct(PDO $conn){                                           
         $this->conn = $conn;
     }
     
@@ -95,7 +95,7 @@ class ArticleRepoImpl implements ArticleRepo {
         return $article;
     }
     
-    public function create($article) {
+    public function create(Article $article) {
         $q = "INSERT INTO {$this->articles_table} (id, title, summary, body, createdAt, categoryId, authorId)
                 VALUES (0, 
                   '{$article->title}', 
@@ -114,7 +114,7 @@ class ArticleRepoImpl implements ArticleRepo {
         return $article;   
     }
     
-    public function update($id, $article) {
+    public function update($id, Article $article) {
         $q = "UPDATE {$this->articles_table}
                 SET title = '{$article->title}', 
                     summary = '{$article->summary}', 
