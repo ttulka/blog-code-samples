@@ -44,7 +44,7 @@ class ArticleController {
     
     $article = $this->repo->create($article);
     
-    return array('id' => (int)$article->id);
+    return (int)$article->id;
   }
   
   public function updateRequest($id, $params) {

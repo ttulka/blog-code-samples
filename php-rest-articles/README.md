@@ -89,7 +89,6 @@ curl http://localhost/articles/1
 ```
 ```
 curl http://localhost/articles -X POST -H "Content-Type: application/json" -d @post.json
-{"id":4}
 ```
 
 ### Update an article

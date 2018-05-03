@@ -136,6 +136,11 @@ class ArticleRepoPDO implements ArticleRepo {
     }
     
     public function delete($id) {
+        $article = $this->fetchOne($id);
+        if ($article === null) {
+            return false;
+        }
+        
         $q = "DELETE FROM {$this->articles_table} WHERE id = :id ";
         
         $stmt = $this->conn->prepare($q);                                  

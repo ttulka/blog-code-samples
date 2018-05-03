@@ -37,12 +37,12 @@ switch ($_SERVER['REQUEST_METHOD']) {
     $_DATA = parseRequestData();
     $response = $controller->createRequest($_DATA);
     
-    if ($response === false) {
+    if ($response === null) {
       http_response_code(400);       
     
     } else {
       http_response_code(201);
-      echo json_encode($response);
+      header("Location: {$_SERVER['REQUEST_URI']}/{$response}");
     }
     break;                           
   
@@ -58,6 +58,9 @@ switch ($_SERVER['REQUEST_METHOD']) {
     if ($response === false) {
       http_response_code(404);
       echo json_encode(array('error' => 'Article not found.'));
+      
+    } else {
+      http_response_code(204);
     }
     break;
     
@@ -72,7 +75,14 @@ switch ($_SERVER['REQUEST_METHOD']) {
     if ($response === false) {
       http_response_code(404);
       echo json_encode(array('error' => 'Article not found.'));
-    }
+    
+    } else {
+      http_response_code(204);
+    }    
+    break;
+    
+  case 'OPTIONS':
+    header('Allow: GET POST PUT DELETE OPTIONS');
     break;
         
   default:

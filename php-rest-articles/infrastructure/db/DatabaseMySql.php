@@ -11,7 +11,7 @@ class DatabaseMySql implements Database {
     
     function __construct($host, $db, $username, $password) {
         try {
-            $this->conn = new PDO("mysql:host=" . $host . ";dbname=" . $db, $username, $password);
+            $this->conn = new PDO("mysql:host={$host};dbname={$db}", $username, $password);
             $this->conn->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
             $this->conn->exec("set names utf8");
             
