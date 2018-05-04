@@ -132,21 +132,20 @@ class ArticleRepoPDO implements ArticleRepo {
         $stmt->bindValue('id', (int)$id, PDO::PARAM_INT);        
         $stmt->execute();
                 
-        return true;    
+        $count = $stmt->rowCount();
+        
+        return $count > 0;
     }
     
     public function delete($id) {
-        $article = $this->fetchOne($id);
-        if ($article === null) {
-            return false;
-        }
-        
         $q = "DELETE FROM {$this->articles_table} WHERE id = :id ";
         
         $stmt = $this->conn->prepare($q);                                  
         $stmt->bindValue('id', (int)$id, PDO::PARAM_INT);        
         $stmt->execute();
         
-        return true;
+        $count = $stmt->rowCount();
+        
+        return $count > 0;
     }
 }

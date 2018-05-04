@@ -13,6 +13,7 @@ class DatabaseMySql implements Database {
         try {
             $this->conn = new PDO("mysql:host={$host};dbname={$db}", $username, $password);
             $this->conn->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+            $this->conn->setAttribute(PDO::MYSQL_ATTR_FOUND_ROWS, true);
             $this->conn->exec("set names utf8");
             
         } catch(PDOException $e){
