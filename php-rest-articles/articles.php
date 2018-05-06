@@ -86,7 +86,8 @@ switch ($_SERVER['REQUEST_METHOD']) {
     break;
         
   default:
-    throw new Exception('HTTP method not supported: ' . $_SERVER['REQUEST_METHOD']);
+    http_response_code(400);
+    echo json_encode(array('error' => 'Not supported HTTP method: ' . $_SERVER['REQUEST_METHOD']));    
 }
 
 // ///////// HELPER FUNCTIONS //////////////////////////////////////////////////////////////////////// 
