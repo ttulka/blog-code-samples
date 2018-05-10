@@ -86,8 +86,8 @@ switch ($_SERVER['REQUEST_METHOD']) {
     break;
         
   default:
-    http_response_code(400);
-    echo json_encode(array('error' => 'Not supported HTTP method: ' . $_SERVER['REQUEST_METHOD']));    
+    http_response_code(405);
+    header('Allow: GET POST PUT DELETE OPTIONS');
 }
 
 // ///////// HELPER FUNCTIONS //////////////////////////////////////////////////////////////////////// 
