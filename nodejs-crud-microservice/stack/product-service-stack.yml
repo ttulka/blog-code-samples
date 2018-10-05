@@ -1,0 +1,262 @@
+AWSTemplateFormatVersion: "2010-09-09"
+Description: "Sample CRUD Product Service"
+
+Parameters:
+
+  Stage:
+    Type: String
+    Description: "Deployment stage name."
+    Default: dev
+
+  ProjectName:
+    Type: String
+    Description: Name of the project.
+    MinLength: "1"
+    MaxLength: "10"
+    AllowedPattern: "[A-Za-z0-9-]+"
+    ConstraintDescription: Malformed input parameter.
+    Default: product-service
+
+  ArtifactS3Bucket:
+    Type: String
+    Description: Artifact S3 bucket 
+  ProductCrudLambdaS3Key:
+    Type: String
+    Description: Artifact object key
+
+Resources:
+
+  ProductTable:
+    Type: AWS::DynamoDB::Table
+    DeletionPolicy: Delete
+    Properties:
+      AttributeDefinitions:
+      - AttributeName: productId
+        AttributeType: S
+      KeySchema:
+      - AttributeName: productId
+        KeyType: HASH
+      ProvisionedThroughput:
+        ReadCapacityUnits: 1
+        WriteCapacityUnits: 1
+
+  ProductEventsTopic:
+    Type: AWS::SNS::Topic
+
+  ProductEventsTopicPolicy:
+    Type: AWS::SNS::TopicPolicy
+    DependsOn: [ProductEventsTopic]
+    Properties:
+      Topics:
+        - !Ref ProductEventsTopic
+      PolicyDocument:
+        Version: 2012-10-17
+        Statement:
+        - Action: ["sns:Subscribe"]
+          Resource: !Ref ProductEventsTopic
+          Principal: "*"
+          Effect: Allow
+
+  ProductCrudLambda:
+    Type: AWS::Lambda::Function
+    DependsOn: [RequestProcessorRole, PackageTable, Bucket]
+    Properties:
+      FunctionName: !Sub "${ProjectName}-request-processor-${AWS::Region}-${Stage}"
+      Runtime: nodejs8.10
+      Handler: index.handler
+      Environment:
+        Variables:
+          PRODUCT_TABLE: !Ref PackageTable
+          EVENTS_TOPIC: !Ref ProductEventsTopic
+      MemorySize: 1024
+      Timeout: 120
+      Role: !GetAtt ProductCrudRole.Arn
+      Code:
+        S3Bucket: !Ref ArtifactS3Bucket
+        S3Key: !Ref ProductCrudLambdaS3Key
+
+  ProductCrudRole:
+    Type: AWS::IAM::Role
+    DependsOn: [ProductTable]
+    Properties:
+      RoleName: !Sub "${ProjectName}-product-crud-role-${AWS::Region}-${Stage}"
+      Path: /
+      AssumeRolePolicyDocument:
+        Statement:
+        - Effect: Allow
+          Principal:
+            Service: [lambda.amazonaws.com]
+          Action: sts:AssumeRole
+      Policies:
+      - PolicyName: LambdaExecutionPolicy
+        PolicyDocument:
+          Version: 2012-10-17
+          Statement:
+          - Action: ["logs:CreateLogGroup", "logs:CreateLogStream", "logs:PutLogEvents"]
+            Resource: !Sub "arn:aws:logs:${AWS::Region}:${AWS::AccountId}:log-group:/aws/lambda/*"
+            Effect: Allow
+          - Action: ["dynamodb:*"]
+            Resource: !GetAtt ProductTable.Arn
+            Effect: Allow
+
+  Api:
+    Type: AWS::ApiGateway::RestApi
+    DependsOn: [ApiRole, ProductCrudLambda]
+    Properties:
+      Name: !Sub "${ProjectName}-api-${AWS::Region}-${Stage}"
+      Body:
+        swagger: "2.0"
+        info:
+          title: !Sub "${ProjectName}-api-${AWS::Region}-${Stage}"
+        basePath: /
+        schemes:
+        - https
+        paths:
+          /:
+            get:
+              x-amazon-apigateway-integration:
+                uri:
+                  !Sub
+                  - "arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${LambdaArn}/invocations"
+                  - { LambdaArn: !GetAtt ProductCrudLambda.Arn}
+                passthroughBehavior: when_no_match
+                httpMethod: POST
+                contentHandling: CONVERT_TO_TEXT
+                type: aws_proxy
+                credentials: !GetAtt ApiRole.Arn
+            post:
+              x-amazon-apigateway-integration:
+                uri:
+                  !Sub
+                  - "arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${LambdaArn}/invocations"
+                  - { LambdaArn: !GetAtt ProductCrudLambda.Arn}
+                passthroughBehavior: when_no_match
+                httpMethod: POST
+                contentHandling: CONVERT_TO_TEXT
+                type: aws_proxy
+                credentials: !GetAtt ApiRole.Arn
+            options:
+              responses:
+                "200":
+                  headers:
+                    Access-Control-Allow-Origin:
+                      type: "string"
+                    Access-Control-Allow-Methods:
+                      type: "string"
+                    Access-Control-Allow-Headers:
+                      type: "string"
+              x-amazon-apigateway-integration:
+                responses:
+                  default:
+                    statusCode: "200"
+                    responseParameters:
+                      method.response.header.Access-Control-Allow-Methods: "'GET,POST,PUT,DELETE,OPTIONS'"
+                      method.response.header.Access-Control-Allow-Headers: "'Content-Type,X-Amz-Date,Authorization,x-api-key,x-amz-security-token,Auth'"
+                      method.response.header.Access-Control-Allow-Origin: "'*'"
+                requestTemplates:
+                  application/json: "{\"statusCode\":200}"
+                passthroughBehavior: when_no_match
+                type: mock
+          /{id}:
+            get:
+              x-amazon-apigateway-integration:
+                uri:
+                  !Sub
+                  - "arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${LambdaArn}/invocations"
+                  - { LambdaArn: !GetAtt ProductCrudLambda.Arn}
+                passthroughBehavior: when_no_match
+                httpMethod: POST
+                contentHandling: CONVERT_TO_TEXT
+                type: aws_proxy
+                credentials: !GetAtt ApiRole.Arn
+            put:
+              x-amazon-apigateway-integration:
+                uri:
+                  !Sub
+                  - "arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${LambdaArn}/invocations"
+                  - { LambdaArn: !GetAtt ProductCrudLambda.Arn}
+                passthroughBehavior: when_no_match
+                httpMethod: PUT
+                contentHandling: CONVERT_TO_TEXT
+                type: aws_proxy
+                credentials: !GetAtt ApiRole.Arn
+            delete:
+              x-amazon-apigateway-integration:
+                uri:
+                  !Sub
+                  - "arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${LambdaArn}/invocations"
+                  - { LambdaArn: !GetAtt ProductCrudLambda.Arn}
+                passthroughBehavior: when_no_match
+                httpMethod: DELETE
+                contentHandling: CONVERT_TO_TEXT
+                type: aws_proxy
+                credentials: !GetAtt ApiRole.Arn
+            options:
+              responses:
+                "200":
+                  headers:
+                    Access-Control-Allow-Origin:
+                      type: "string"
+                    Access-Control-Allow-Methods:
+                      type: "string"
+                    Access-Control-Allow-Headers:
+                      type: "string"
+              x-amazon-apigateway-integration:
+                responses:
+                  default:
+                    statusCode: "200"
+                    responseParameters:
+                      method.response.header.Access-Control-Allow-Methods: "'GET,POST,PUT,DELETE,OPTIONS'"
+                      method.response.header.Access-Control-Allow-Headers: "'Content-Type,X-Amz-Date,Authorization,x-api-key,x-amz-security-token,Auth'"
+                      method.response.header.Access-Control-Allow-Origin: "'*'"
+                requestTemplates:
+                  application/json: "{\"statusCode\":200}"
+                passthroughBehavior: when_no_match
+                type: mock
+                
+  ApiRole:
+    Type: AWS::IAM::Role
+    Properties:
+      RoleName: !Sub "${ProjectName}-api-role-${AWS::Region}-${Stage}"
+      AssumeRolePolicyDocument:
+        Statement:
+        - Action: sts:AssumeRole
+          Effect: Allow
+          Principal:
+            Service:
+            - apigateway.amazonaws.com
+      Path: "/"
+      Policies:
+      - PolicyName: !Sub "${ProjectName}-api-policy-${AWS::Region}-${Stage}"
+        PolicyDocument:
+          Statement:
+          - Action: ["lambda:Invoke*"]
+            Resource: !Sub "arn:aws:lambda:${AWS::Region}:${AWS::AccountId}:function:${ProductCrudLambda}*"
+            Effect: Allow
+          - Action: ["cloudwatch:*"]
+            Resource: "arn:aws:cloudwatch:*"
+            Effect: Allow
+
+  ApiDeployment:
+    Type: AWS::ApiGateway::Deployment
+    DependsOn: [Api]
+    Properties:
+      RestApiId: !Ref Api
+      StageName: !Ref Stage
+
+Outputs:
+
+  ApiUrl:
+    Description: "URL of the Product Service API"
+    Value: !Join
+      - ''
+      - - https://
+        - !Ref Api
+        - '.execute-api.'
+        - !Ref 'AWS::Region'
+        - '.amazonaws.com/'
+        - !Ref Stage
+
+  ProductEventsTopicArn:
+    Description: "Topic for the Product Service Events."
+    Value: !Ref ProductEventsTopic
