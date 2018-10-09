@@ -12,7 +12,7 @@ Parameters:
     Type: String
     Description: Name of the project.
     MinLength: "1"
-    MaxLength: "10"
+    MaxLength: "20"
     AllowedPattern: "[A-Za-z0-9-]+"
     ConstraintDescription: Malformed input parameter.
     Default: product-service
@@ -59,14 +59,14 @@ Resources:
 
   ProductCrudLambda:
     Type: AWS::Lambda::Function
-    DependsOn: [RequestProcessorRole, PackageTable, Bucket]
+    DependsOn: [ProductTable, ProductEventsTopic]
     Properties:
-      FunctionName: !Sub "${ProjectName}-request-processor-${AWS::Region}-${Stage}"
+      FunctionName: !Sub "${ProjectName}-lambda-${AWS::Region}-${Stage}"
       Runtime: nodejs8.10
       Handler: index.handler
       Environment:
         Variables:
-          PRODUCT_TABLE: !Ref PackageTable
+          PRODUCT_TABLE: !Ref ProductTable
           EVENTS_TOPIC: !Ref ProductEventsTopic
       MemorySize: 1024
       Timeout: 120
@@ -77,9 +77,9 @@ Resources:
 
   ProductCrudRole:
     Type: AWS::IAM::Role
-    DependsOn: [ProductTable]
+    DependsOn: [ProductTable, ProductEventsTopic]
     Properties:
-      RoleName: !Sub "${ProjectName}-product-crud-role-${AWS::Region}-${Stage}"
+      RoleName: !Sub "${ProjectName}-lambda-role-${AWS::Region}-${Stage}"
       Path: /
       AssumeRolePolicyDocument:
         Statement:
@@ -95,8 +95,11 @@ Resources:
           - Action: ["logs:CreateLogGroup", "logs:CreateLogStream", "logs:PutLogEvents"]
             Resource: !Sub "arn:aws:logs:${AWS::Region}:${AWS::AccountId}:log-group:/aws/lambda/*"
             Effect: Allow
-          - Action: ["dynamodb:*"]
-            Resource: !GetAtt ProductTable.Arn
+          - Action: ["dynamodb:Scan", "dynamodb:GetItem", "dynamodb:PutItem", "dynamodb:UpdateItem", "dynamodb:DeleteItem"]
+            Resource: !GetAtt ProductTable.Arn            
+            Effect: Allow
+          - Action: ["sns:Publish"]
+            Resource: !Ref ProductEventsTopic
             Effect: Allow
 
   Api:
