@@ -40,7 +40,10 @@ async function getProduct(id) {
     const res = await dynamoDb.get(params).promise()
     
     return (res.Item) 
-        ? { id: res.Item.productId, name: res.Item.name, description: res.Item.description, price: res.Item.price }
+        ? { id: res.Item.productId,
+            name: res.Item.name,
+            description: res.Item.description,
+            price: res.Item.price }
         : null
 }
 

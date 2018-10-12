@@ -40,7 +40,10 @@ async function listProducts(lastEvaluatedKey) {
     const res = await dynamoDb.scan(params).promise()
     
     const products = (res.Count && res.Items) 
-        ? res.Items.map(item => ({ id: item.productId, name: item.name, description: item.description, price: item.price }))
+        ? res.Items.map(item => ({ id: item.productId,
+                                   name: item.name,
+                                   description: item.description,
+                                   price: item.price }))
         : []
         
     return products.concat(res.LastEvaluatedKey ? listProducts(res.LastEvaluatedKey) : [])
