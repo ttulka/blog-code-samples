@@ -33,7 +33,7 @@ exports.handler = async function(event) {
                 return buildResponse(405, {error: 'Wrong request method - only GET and POST are supported for this resource.'})
         }
     } else {
-        return buildResponse(404, {error: 'Wrong request - resource does not exist.'})
+        return buildResponse(404, {error: 'Resource does not exist.'})
     }
 }
 
