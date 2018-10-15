@@ -17,15 +17,18 @@ exports.handler = async function(event) {
     if (!event.body) {
         return buildResponse(400, {error: 'Wrong request - body payload must be set.'})
     }
-    if (!event.body.name || !event.body.description || !event.body.price) {
+    
+    const payload = JSON.parse(event.body)
+    
+    if (!payload.name || !payload.description || !payload.price) {
         return buildResponse(400, {error: 'Wrong request - body payload must contain attributes [name, description, price].'})
     }
-    if (isNaN(event.body.price)) {
+    if (isNaN(payload.price)) {
         return buildResponse(400, {error: 'Wrong request - attribute [price] must a number.'})
     }
 
     try {
-        const response = await dispatch(event.body)
+        const response = await dispatch(payload)
         return buildResponse(201, response)
 
     } catch (error) {

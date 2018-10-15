@@ -123,7 +123,7 @@ Resources:
                   - "arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${LambdaArn}/invocations"
                   - { LambdaArn: !GetAtt ProductCrudLambda.Arn}
                 passthroughBehavior: when_no_match
-                httpMethod: GET
+                httpMethod: POST
                 contentHandling: CONVERT_TO_TEXT
                 type: aws_proxy
                 credentials: !GetAtt ApiRole.Arn
