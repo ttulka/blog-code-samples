@@ -59,7 +59,7 @@ Resources:
 
   ProductCrudLambda:
     Type: AWS::Lambda::Function
-    DependsOn: [ProductTable, ProductEventsTopic]
+    DependsOn: [ProductCrudRole, ProductTable, ProductEventsTopic]
     Properties:
       FunctionName: !Sub "${ProjectName}-lambda-${AWS::Region}-${Stage}"
       Runtime: nodejs8.10
@@ -123,7 +123,7 @@ Resources:
                   - "arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${LambdaArn}/invocations"
                   - { LambdaArn: !GetAtt ProductCrudLambda.Arn}
                 passthroughBehavior: when_no_match
-                httpMethod: POST
+                httpMethod: GET
                 contentHandling: CONVERT_TO_TEXT
                 type: aws_proxy
                 credentials: !GetAtt ApiRole.Arn
