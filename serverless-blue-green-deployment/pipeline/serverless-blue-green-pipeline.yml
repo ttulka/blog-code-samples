@@ -1,0 +1,319 @@
+AWSTemplateFormatVersion: "2010-09-09"
+Description: "Serverless Blue-Green CD Pipeline."
+
+Parameters:
+
+  ProjectName:
+    Type: String
+    Description: Name of the project.
+    MinLength: "1"
+    MaxLength: "20"
+    AllowedPattern: "[A-Za-z0-9-]+"
+    ConstraintDescription: Malformed input parameter. ProjectName must only contain upper and lower case letters, numbers, and -.
+    Default: blue-green-sample
+    
+  CodeCommitRepoName:
+    Type: String
+    Description: The CodeCommit repo name
+    Default: blue-green-sample
+  CodeCommitRepoBranch:
+    Type: String
+    Description: The CodeCommit repo branch
+    Default: master
+
+Resources:
+
+  #### SECURITY #######################################################################
+  
+  S3PipelineArtifactsPolicy:
+    Type: AWS::S3::BucketPolicy
+    DependsOn: [S3PipelineArtifacts, CodePipelineRole, CodeBuildRole]
+    Properties:
+      Bucket: !Ref S3PipelineArtifacts
+      PolicyDocument:
+        Statement:
+        - Action: ["s3:*"]
+          Effect: Allow
+          Resource:
+            - !Sub "arn:aws:s3:::${S3PipelineArtifacts}"
+            - !Sub "arn:aws:s3:::${S3PipelineArtifacts}/*"
+          Principal:
+            AWS:
+              - !GetAtt CodePipelineRole.Arn
+              - !GetAtt CodeBuildRole.Arn
+
+  CodeBuildRole:
+    Type: AWS::IAM::Role
+    Properties:
+      RoleName: !Sub "${ProjectName}-codebuild-role"
+      Path: /
+      AssumeRolePolicyDocument:
+        Statement:
+        - Effect: Allow
+          Principal:
+            Service: [codebuild.amazonaws.com]
+          Action: sts:AssumeRole
+      Policies:
+      - PolicyName: CodeBuildPolicy
+        PolicyDocument:
+          Statement:
+          - Action: ["logs:CreateLogStream", "logs:PutLogEvents", "logs:CreateLogGroup"]
+            Resource: !Sub "arn:aws:logs:${AWS::Region}:${AWS::AccountId}:log-group:/aws/codebuild/${ProjectName}*"
+            Effect: Allow
+          - Action: ["cloudformation:DescribeStacks"]
+            Resource: !Sub "arn:aws:cloudformation:${AWS::Region}:${AWS::AccountId}:stack/${ProjectName}*"
+            Effect: Allow
+
+  CloudFormationRole:
+    Type: AWS::IAM::Role
+    Properties:
+      RoleName: !Sub "${ProjectName}-cloudformation-role"
+      Path: /
+      AssumeRolePolicyDocument:
+        Statement:
+        - Effect: Allow
+          Principal:
+            Service: [cloudformation.amazonaws.com]
+          Action: sts:AssumeRole
+      Policies:
+      - PolicyName: CloudFormationPolicy
+        PolicyDocument:
+          Statement:
+          - Action: ["s3:*"]
+            Resource: "*"
+            Effect: Allow
+          - Action: ["iam:GetRole", "iam:CreateRole", "iam:DeleteRole", "iam:AttachRolePolicy", "iam:DetachRolePolicy", "iam:DeleteRolePolicy", "iam:PutRolePolicy", "iam:PassRole"]
+            Resource: !Sub "arn:aws:iam::${AWS::AccountId}:role/${ProjectName}*"
+            Effect: Allow
+          - Action: ["cloudformation:CreateChangeSet"]
+            Resource: !Sub "arn:aws:cloudformation:${AWS::Region}:aws:transform/${ProjectName}*"
+            Effect: Allow
+          - Action: ["lambda:*"]
+            Resource: !Sub "arn:aws:lambda:${AWS::Region}:${AWS::AccountId}:function:${ProjectName}*"
+            Effect: Allow
+          - Action: ["apigateway:*"]
+            Resource: 
+            - !Sub "arn:aws:apigateway:${AWS::Region}::${ProjectName}*"
+            - !Sub "arn:aws:apigateway:${AWS::Region}::/restapis*"
+            Effect: Allow
+            
+  CodePipelineRole:
+    Type: AWS::IAM::Role
+    DependsOn: [S3PipelineArtifacts]
+    Properties:
+      RoleName: !Sub "${ProjectName}-codepipeline-role"
+      Path: /
+      AssumeRolePolicyDocument:
+        Statement:
+        - Effect: Allow
+          Principal:
+            Service: [codepipeline.amazonaws.com]
+          Action: sts:AssumeRole
+      Policies:
+      - PolicyName: CodePipelinePolicy
+        PolicyDocument:
+          Statement:
+          - Action: ["s3:*"]
+            Resource:
+              - !Sub "arn:aws:s3:::${S3PipelineArtifacts}"
+              - !Sub "arn:aws:s3:::${S3PipelineArtifacts}/*"
+            Effect: Allow
+          - Action: ["codecommit:CancelUploadArchive", "codecommit:GetBranch", "codecommit:GetCommit", "codecommit:GetUploadArchiveStatus", "codecommit:UploadArchive"]
+            Resource: !Sub "arn:aws:codecommit:${AWS::Region}:${AWS::AccountId}:${CodeCommitRepoName}"
+            Effect: Allow
+          - Action: ["codebuild:StartBuild", "codebuild:BatchGetBuilds"]
+            Resource: !Sub "arn:aws:codebuild:${AWS::Region}:${AWS::AccountId}:project/${ProjectName}*"
+            Effect: Allow
+          - Action: ["cloudformation:*"]
+            Resource: !Sub "arn:aws:cloudformation:${AWS::Region}:${AWS::AccountId}:stack/${ProjectName}*"
+            Effect: Allow
+          - Action: ["iam:PassRole", "iam:ListRoles"]
+            Resource: "*"
+            Effect: Allow
+
+  #### PIPELINE #######################################################################
+  
+  S3PipelineArtifacts:
+    Type: AWS::S3::Bucket
+    DeletionPolicy: Delete
+    Properties:
+      BucketName: !Sub "pipeline-${ProjectName}"
+
+  CodeBuild:
+    Type: AWS::CodeBuild::Project
+    DependsOn: [CodeBuildRole]
+    Properties:
+      Artifacts:
+        Type: CODEPIPELINE
+      Environment:
+        ComputeType: BUILD_GENERAL1_SMALL
+        Image: "aws/codebuild/nodejs:10.1.0"
+        Type: LINUX_CONTAINER
+      Name: !Sub "${ProjectName}-codebuild-build"
+      ServiceRole: !Ref CodeBuildRole
+      Source:
+        Type: CODEPIPELINE
+        BuildSpec: |
+          version: 0.2          
+          phases:
+            install:
+              commands:
+                - npm install -g grunt-cli
+            pre_build:
+              commands:
+                - cd sample-service
+                - npm install
+            build:
+              commands:                
+                - npm run package  
+            post_build:
+              commands:
+                - unzip -o -d out dist/sample-service.zip        
+          artifacts:
+            base-directory: sample-service/out
+            files: ['**/*']            
+      TimeoutInMinutes: 5
+
+  CodeBuildTest:
+    Type: AWS::CodeBuild::Project
+    DependsOn: [CodeBuildRole]
+    Properties:
+      Artifacts:
+        Type: CODEPIPELINE
+      Environment:
+        ComputeType: BUILD_GENERAL1_SMALL
+        Image: "aws/codebuild/nodejs:10.1.0"
+        Type: LINUX_CONTAINER
+        EnvironmentVariables:
+          - Name: APP_STACK_NAME
+            Value: !Sub "${ProjectName}-test-blue"
+      Name: !Sub "${ProjectName}-codebuild-test-build"
+      ServiceRole: !Ref CodeBuildRole
+      Source:
+        Type: CODEPIPELINE
+        BuildSpec: |
+          version: 0.2
+          phases:
+            install:
+              commands:
+                - npm install -g jasmine
+                - SERVICE_ENDPOINT=`aws cloudformation describe-stacks --stack-name $APP_STACK_NAME --query "Stacks[0].Outputs[?OutputKey=='ApiUrl'].OutputValue" --output text`
+                - echo $SERVICE_ENDPOINT
+            pre_build:
+              commands:
+                - cd sample-service
+                - npm install
+            build:
+              commands:                
+                - npm test
+      TimeoutInMinutes: 5
+
+  CodePipeline:
+    Type: AWS::CodePipeline::Pipeline
+    DependsOn: [S3PipelineArtifacts, CodePipelineRole, CodeBuild, CodeBuildTest]
+    Properties:
+      Name: !Sub "${ProjectName}-pipeline"
+      RoleArn: !GetAtt CodePipelineRole.Arn
+      RestartExecutionOnUpdate: true
+      Stages:
+      - Name: Source
+        Actions:
+        - Name: get-source-code
+          InputArtifacts: []
+          OutputArtifacts:
+          - Name: SourceArtifact
+          ActionTypeId:
+            Category: Source
+            Owner: AWS
+            Provider: CodeCommit
+            Version: 1
+          Configuration:
+            RepositoryName: !Ref CodeCommitRepoName
+            BranchName: !Ref CodeCommitRepoBranch
+          RunOrder: 1
+      - Name: Build
+        Actions:
+        - Name: build-sample-service
+          InputArtifacts:
+          - Name: SourceArtifact
+          OutputArtifacts:
+          - Name: BuildArtifact
+          ActionTypeId:
+            Category: Build
+            Owner: AWS
+            Version: 1
+            Provider: CodeBuild
+          Configuration:
+            ProjectName: !Ref CodeBuild
+          RunOrder: 1
+      - Name: StagingBlue
+        Actions:
+        - Name: blue-sample-service
+          InputArtifacts:
+          - Name: SourceArtifact
+          - Name: BuildArtifact
+          OutputArtifacts: []
+          ActionTypeId:
+            Category: Deploy
+            Owner: AWS
+            Version: 1
+            Provider: CloudFormation
+          Configuration:
+            StackName: !Sub "${ProjectName}-test-blue"
+            ChangeSetName: !Sub "${ProjectName}-test-blue-changeset"
+            ActionMode: CREATE_UPDATE
+            Capabilities: CAPABILITY_NAMED_IAM
+            TemplatePath: !Sub "SourceArtifact::stack/sample-service-stack.yml"
+            RoleArn: !GetAtt CloudFormationRole.Arn
+            ParameterOverrides: !Sub |
+              {
+                "Stage" : "test-blue",
+                "ProjectName" : "${ProjectName}",
+                "ArtifactS3Bucket" : "${S3PipelineArtifacts}",
+                "LambdaS3Key" : { "Fn::GetArtifactAtt" : ["BuildArtifact", "ObjectKey"] }
+              }
+          RunOrder: 1
+      - Name: Test
+        Actions:
+        - Name: test-sample-service
+          InputArtifacts:
+          - Name: SourceArtifact
+          OutputArtifacts: []
+          ActionTypeId:
+            Category: Build
+            Owner: AWS
+            Version: 1
+            Provider: CodeBuild
+          Configuration:
+            ProjectName: !Ref CodeBuildTest
+          RunOrder: 1      
+      - Name: StagingGreen
+        Actions:
+        - Name: green-sample-service
+          InputArtifacts:
+          - Name: SourceArtifact
+          - Name: BuildArtifact
+          OutputArtifacts: []
+          ActionTypeId:
+            Category: Deploy
+            Owner: AWS
+            Version: 1
+            Provider: CloudFormation
+          Configuration:
+            StackName: !Sub "${ProjectName}-test-green"
+            ChangeSetName: !Sub "${ProjectName}-test-green-changeset"
+            ActionMode: CREATE_UPDATE
+            Capabilities: CAPABILITY_NAMED_IAM
+            TemplatePath: !Sub "SourceArtifact::stack/sample-service-stack.yml"
+            RoleArn: !GetAtt CloudFormationRole.Arn
+            ParameterOverrides: !Sub |
+              {
+                "Stage" : "test-green",
+                "ProjectName" : "${ProjectName}",
+                "ArtifactS3Bucket" : "${S3PipelineArtifacts}",
+                "LambdaS3Key" : { "Fn::GetArtifactAtt" : ["BuildArtifact", "ObjectKey"] }
+              }
+          RunOrder: 1
+      ArtifactStore:
+        Type: S3
+        Location: !Ref S3PipelineArtifacts

@@ -1,0 +1,21 @@
+{
+  "name": "sample-service",
+  "version": "1.0.0",
+  "main": "build/index.js",
+  "requires": true,
+  "scripts": {
+    "build": "grunt build",
+    "package": "grunt package",
+    "test": "jasmine"
+  },
+  "devDependencies": {
+    "axios": "^0.18.0",
+    "grunt": "^1.0.3",
+    "grunt-aws-lambda-package": "0.0.6",
+    "grunt-contrib-clean": "^2.0.0",
+    "grunt-run": "^0.8.1",
+    "jasmine": "^3.2.0",
+    "jasmine-core": "^3.2.1"
+  },
+  "dependencies": {}
+}
