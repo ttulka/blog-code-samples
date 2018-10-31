@@ -1,0 +1,169 @@
+AWSTemplateFormatVersion: "2010-09-09"
+Description: "Money"
+
+Parameters:
+
+    ProjectName:
+    Type: String
+    Description: Name of the project.
+    MinLength: "1"
+    MaxLength: "20"
+    AllowedPattern: "[A-Za-z0-9-]+"
+    ConstraintDescription: Malformed input parameter.
+    Default: money
+
+  ArtifactS3Bucket:
+    Type: String
+    Description: Artifact S3 bucket 
+  MoneyLambdaS3Key:
+    Type: String
+    Description: Artifact object key
+  ExchangeLambdaS3Key:
+    Type: String
+    Description: Artifact object key
+
+Resources:
+
+  MoneyLambda:
+    Type: AWS::Lambda::Function
+    DependsOn: [MoneyRole, ExchangeLambda]
+    Properties:
+      FunctionName: !Sub "${ProjectName}-money-lambda"
+      Runtime: nodejs8.10
+      Handler: index.handler
+      Environment:
+        Variables:
+          EXCHANGE_SERVICE: !Ref ExchangeLambda
+      MemorySize: 1024
+      Timeout: 120
+      Role: !GetAtt MoneyRole.Arn
+      Code:
+        S3Bucket: !Ref ArtifactS3Bucket
+        S3Key: !Ref MoneyLambdaS3Key
+
+  MoneyRole:
+    Type: AWS::IAM::Role
+    DependsOn: [ExchangeLambda]
+    Properties:
+      RoleName: !Sub "${ProjectName}-money-role"
+      Path: /
+      AssumeRolePolicyDocument:
+        Statement:
+        - Effect: Allow
+          Principal:
+            Service: [lambda.amazonaws.com]
+          Action: sts:AssumeRole
+      Policies:
+      - PolicyName: !Sub "${ProjectName}-money-policy"
+        PolicyDocument:
+          Version: 2012-10-17
+          Statement:
+          - Action: ["logs:*"]
+            Resource: !Sub "arn:aws:logs:${AWS::Region}:${AWS::AccountId}:log-group:/aws/lambda/*"
+            Effect: Allow
+          - Action: ["lambda:Invoke"]
+            Resource: !GetAtt ExchangeLambda.Arn            
+            Effect: Allow
+
+  MoneyApi:
+    Type: AWS::ApiGateway::RestApi
+    DependsOn: [MoneyApiRole, MoneyLambda]
+    Properties:
+      Name: !Sub "${ProjectName}-money-api"
+      Body:
+        swagger: "2.0"
+        info:
+          title: !Sub "${ProjectName}-money-api"
+        basePath: /
+        schemes:
+        - https
+        paths:
+          /:
+            get:
+              x-amazon-apigateway-integration:
+                uri:
+                  !Sub
+                  - "arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${LambdaArn}/invocations"
+                  - { LambdaArn: !GetAtt MoneyLambda.Arn}
+                passthroughBehavior: when_no_match
+                httpMethod: POST
+                contentHandling: CONVERT_TO_TEXT
+                type: aws_proxy
+                credentials: !GetAtt ApiRole.Arn
+            post:
+              x-amazon-apigateway-integration:
+                uri:
+                  !Sub
+                  - "arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${LambdaArn}/invocations"
+                  - { LambdaArn: !GetAtt MoneyLambda.Arn}
+                passthroughBehavior: when_no_match
+                httpMethod: POST
+                contentHandling: CONVERT_TO_TEXT
+                type: aws_proxy
+                credentials: !GetAtt ApiRole.Arn
+            options:
+              responses:
+                "200":
+                  headers:
+                    Access-Control-Allow-Origin:
+                      type: "string"
+                    Access-Control-Allow-Methods:
+                      type: "string"
+                    Access-Control-Allow-Headers:
+                      type: "string"
+              x-amazon-apigateway-integration:
+                responses:
+                  default:
+                    statusCode: "200"
+                    responseParameters:
+                      method.response.header.Access-Control-Allow-Methods: "'GET,POST,OPTIONS'"
+                      method.response.header.Access-Control-Allow-Headers: "'Content-Type,X-Amz-Date,Authorization,x-api-key,x-amz-security-token,Auth'"
+                      method.response.header.Access-Control-Allow-Origin: "'*'"
+                requestTemplates:
+                  application/json: "{\"statusCode\":200}"
+                passthroughBehavior: when_no_match
+                type: mock
+                
+  MoneyApiRole:
+    Type: AWS::IAM::Role
+    DependsOn: [MoneyLambda]
+    Properties:
+      RoleName: !Sub "${ProjectName}-money-api-role"
+      AssumeRolePolicyDocument:
+        Statement:
+        - Action: sts:AssumeRole
+          Effect: Allow
+          Principal:
+            Service:
+            - apigateway.amazonaws.com
+      Path: "/"
+      Policies:
+      - PolicyName: !Sub "${ProjectName}-money-api-policy"
+        PolicyDocument:
+          Statement:
+          - Action: ["lambda:Invoke*"]
+            Resource: !Sub "arn:aws:lambda:${AWS::Region}:${AWS::AccountId}:function:${MoneyLambda}*"
+            Effect: Allow
+          - Action: ["cloudwatch:*"]
+            Resource: "arn:aws:cloudwatch:${AWS::Region}:${AWS::AccountId}*"
+            Effect: Allow
+
+  MoneyApiDeployment:
+    Type: AWS::ApiGateway::Deployment
+    DependsOn: [MoneyApi]
+    Properties:
+      RestApiId: !Ref MoneyApi
+      StageName: dev
+
+Outputs:
+
+  MoneyApiUrl:
+    Description: "URL of the Money API"
+    Value: !Join
+      - ''
+      - - https://
+        - !Ref MoneyApi
+        - '.execute-api.'
+        - !Ref 'AWS::Region'
+        - '.amazonaws.com/'
+        - dev
