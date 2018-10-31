@@ -12,9 +12,15 @@ exports.handler = async function(event) {
         return buildResponse(400, {error: '"target" must be set.'})
     }
     
-    const rate = exchange.rate(event.payload.origin, event.payload.target)
+    try {
+        const rate = exchange.rate(event.payload.origin, event.payload.target)
     
-    return buildResponse(200, {rate})
+        return buildResponse(200, {rate})
+        
+    } catch (err) {
+        console.error(err)
+        return buildResponse(400, {error: err.message})
+    }
 }
 
 function buildResponse(statusCode, data = null) {
