@@ -9,7 +9,7 @@ describe('exchange test suite', function() {
         
         rate = await exchange.rate('USD', 'EUR') 
         expect(rate).toBeDefined()
-    });
+    })
     
     it('rate identity test', async function() {
         var rate
@@ -18,5 +18,5 @@ describe('exchange test suite', function() {
         
         rate = await exchange.rate('EUR', 'EUR') 
         expect(rate).toBe(1)
-    });
-});
+    })
+})
