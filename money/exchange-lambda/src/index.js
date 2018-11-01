@@ -13,23 +13,12 @@ exports.handler = async function(event) {
     }
     
     try {
-        const rate = exchange.rate(event.payload.origin, event.payload.target)
+        const rate = await exchange.rate(event.payload.origin, event.payload.target)
     
-        return buildResponse(200, {rate})
+        return {rate}
         
     } catch (e) {
         console.error(e)
-        return buildResponse(e.type === 'validation' ? 400 : 500, {error: e.toString()})
-    }
-}
-
-function buildResponse(statusCode, data = null) {
-    return {
-        isBase64Encoded: false,
-        statusCode: statusCode,
-        headers: {
-            'Content-Type': 'application/json'
-        },
-        body: JSON.stringify(data)
+        return {error: e.toString()}
     }
 }
