@@ -78,19 +78,8 @@ Resources:
         schemes:
         - https
         paths:
-          /:
+          /times:
             get:
-              x-amazon-apigateway-integration:
-                uri:
-                  !Sub
-                  - "arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${LambdaArn}/invocations"
-                  - { LambdaArn: !GetAtt MoneyLambda.Arn}
-                passthroughBehavior: when_no_match
-                httpMethod: POST
-                contentHandling: CONVERT_TO_TEXT
-                type: aws_proxy
-                credentials: !GetAtt ApiRole.Arn
-            post:
               x-amazon-apigateway-integration:
                 uri:
                   !Sub
@@ -116,14 +105,48 @@ Resources:
                   default:
                     statusCode: "200"
                     responseParameters:
-                      method.response.header.Access-Control-Allow-Methods: "'GET,POST,OPTIONS'"
+                      method.response.header.Access-Control-Allow-Methods: "'GET,OPTIONS'"
                       method.response.header.Access-Control-Allow-Headers: "'Content-Type,X-Amz-Date,Authorization,x-api-key,x-amz-security-token,Auth'"
                       method.response.header.Access-Control-Allow-Origin: "'*'"
                 requestTemplates:
                   application/json: "{\"statusCode\":200}"
                 passthroughBehavior: when_no_match
                 type: mock
-                
+          /reduce:
+            get:
+              x-amazon-apigateway-integration:
+                uri:
+                  !Sub
+                  - "arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${LambdaArn}/invocations"
+                  - { LambdaArn: !GetAtt MoneyLambda.Arn}
+                passthroughBehavior: when_no_match
+                httpMethod: POST
+                contentHandling: CONVERT_TO_TEXT
+                type: aws_proxy
+                credentials: !GetAtt ApiRole.Arn
+            options:
+              responses:
+                "200":
+                  headers:
+                    Access-Control-Allow-Origin:
+                      type: "string"
+                    Access-Control-Allow-Methods:
+                      type: "string"
+                    Access-Control-Allow-Headers:
+                      type: "string"
+              x-amazon-apigateway-integration:
+                responses:
+                  default:
+                    statusCode: "200"
+                    responseParameters:
+                      method.response.header.Access-Control-Allow-Methods: "'GET,OPTIONS'"
+                      method.response.header.Access-Control-Allow-Headers: "'Content-Type,X-Amz-Date,Authorization,x-api-key,x-amz-security-token,Auth'"
+                      method.response.header.Access-Control-Allow-Origin: "'*'"
+                requestTemplates:
+                  application/json: "{\"statusCode\":200}"
+                passthroughBehavior: when_no_match
+                type: mock
+                                
   MoneyApiRole:
     Type: AWS::IAM::Role
     DependsOn: [MoneyLambda]
