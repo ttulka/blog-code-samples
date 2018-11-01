@@ -17,9 +17,9 @@ exports.handler = async function(event) {
     
         return buildResponse(200, {rate})
         
-    } catch (err) {
-        console.error(err)
-        return buildResponse(400, {error: err.message})
+    } catch (e) {
+        console.error(e)
+        return buildResponse(e.type === 'validation' ? 400 : 500, {error: e.toString()})
     }
 }
 
