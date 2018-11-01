@@ -1,10 +1,10 @@
-exports.times = async function(money, multiplier) {
+exports.times = function(money, multiplier) {
     return {amount: money.amount * multiplier, currency: money.currency}
 }
 
-exports.equals = async function(money1, money2) {
-    return money1.amount === money2.amount 
-        && money1.currency === money2.currency
+exports.reduce = async function(money, currency, exchange) {
+    const rate = exchange.rate(money.currency, currency)        
+    return {amount: money.amount * rate, currency}
 }
 
 class ValidationError extends Error {

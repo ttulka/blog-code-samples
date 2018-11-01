@@ -2,44 +2,55 @@ describe('money test suite', function() {
     
     const money = require('../src/money')
   
-    it('USD multiplication test', async function() {
-        var result = await money.times({amount: 5, currency: 'USD'}, 2)
+    it('multiplication test', function() {
+        var result
+        result = money.times({amount: 5, currency: 'USD'}, 2)
         expect(result).toBeDefined()        
         expect(result.amount).toBe(10)
         expect(result.currency).toBe('USD')
         
-        result = await money.times({amount: 10, currency: 'USD'}, 3)        
+        result = money.times({amount: 10, currency: 'USD'}, 3)        
         expect(result).toBeDefined()        
         expect(result.amount).toBe(30)
         expect(result.currency).toBe('USD')
-    });
-    
-    it('EUR multiplication test', async function() {
-        var result = await money.times({amount: 5, currency: 'EUR'}, 2)
+        
+        result = money.times({amount: 5, currency: 'EUR'}, 2)
         expect(result).toBeDefined()        
         expect(result.amount).toBe(10)
         expect(result.currency).toBe('EUR')
         
-        result = await money.times({amount: 10, currency: 'EUR'}, 3)        
+        result = money.times({amount: 10, currency: 'EUR'}, 3)        
         expect(result).toBeDefined()        
         expect(result.amount).toBe(30)
         expect(result.currency).toBe('EUR')
-    });
+    })
     
-    it('equality test', async function() {
+    it('reduction test', async function() {
+        const fakeExchange = {
+            rate: (origin, target) => {
+                if (origin === target) return 1
+                if (origin === 'EUR' && target === 'USD') return 1.5
+                if (origin === 'USD' && target === 'EUR') return 0.5
+                throw new Error('Unsupported currencies')
+            }
+        }
         const fiveDollars = {amount: 5, currency: 'USD'}
-        var result = await money.equals(fiveDollars, fiveDollars)
-        expect(result).toBe(true)
+        const fiveEuros = {amount: 5, currency: 'EUR'}
         
-        const tenDollars = {amount: 10, currency: 'USD'}
-        var result = await money.equals(fiveDollars, tenDollars)
-        expect(result).toBe(false)
+        var result
+        result = await money.reduce(fiveDollars, 'USD', fakeExchange)
+        expect(result).toBeDefined()        
+        expect(result.amount).toBe(5)
+        expect(result.currency).toBe('USD')
         
-        const fileEuros = {amount: 5, currency: 'EUR'}
-        var result = await money.equals(fileEuros, fileEuros)
-        expect(result).toBe(true)
+        result = await money.reduce(fiveDollars, 'EUR', fakeExchange)
+        expect(result).toBeDefined()        
+        expect(result.amount).toBe(2.5)
+        expect(result.currency).toBe('EUR')
         
-        var result = await money.equals(fileEuros, fiveDollars)
-        expect(result).toBe(false)
-    });
-});
+        result = await money.reduce(fiveEuros, 'USD', fakeExchange)
+        expect(result).toBeDefined()        
+        expect(result.amount).toBe(7.5)
+        expect(result.currency).toBe('USD')
+    })
+})
