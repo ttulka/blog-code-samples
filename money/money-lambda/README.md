@@ -1,4 +1,4 @@
-# Exchange Lambda
+# Money Lambda
 
 ## Prerequisites
 ```
