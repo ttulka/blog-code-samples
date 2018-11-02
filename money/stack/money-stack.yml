@@ -61,7 +61,7 @@ Resources:
           - Action: ["logs:*"]
             Resource: !Sub "arn:aws:logs:${AWS::Region}:${AWS::AccountId}:log-group:/aws/lambda/*"
             Effect: Allow
-          - Action: ["lambda:Invoke"]
+          - Action: ["lambda:InvokeFunction"]
             Resource: !GetAtt ExchangeLambda.Arn            
             Effect: Allow
 
@@ -113,7 +113,7 @@ Resources:
         - https
         paths:
           /times:
-            get:
+            post:
               x-amazon-apigateway-integration:
                 uri:
                   !Sub
@@ -139,7 +139,7 @@ Resources:
                   default:
                     statusCode: "200"
                     responseParameters:
-                      method.response.header.Access-Control-Allow-Methods: "'GET,OPTIONS'"
+                      method.response.header.Access-Control-Allow-Methods: "'POST,OPTIONS'"
                       method.response.header.Access-Control-Allow-Headers: "'Content-Type,X-Amz-Date,Authorization,x-api-key,x-amz-security-token,Auth'"
                       method.response.header.Access-Control-Allow-Origin: "'*'"
                 requestTemplates:
@@ -147,7 +147,7 @@ Resources:
                 passthroughBehavior: when_no_match
                 type: mock
           /reduce:
-            get:
+            post:
               x-amazon-apigateway-integration:
                 uri:
                   !Sub
@@ -173,7 +173,7 @@ Resources:
                   default:
                     statusCode: "200"
                     responseParameters:
-                      method.response.header.Access-Control-Allow-Methods: "'GET,OPTIONS'"
+                      method.response.header.Access-Control-Allow-Methods: "'POST,OPTIONS'"
                       method.response.header.Access-Control-Allow-Headers: "'Content-Type,X-Amz-Date,Authorization,x-api-key,x-amz-security-token,Auth'"
                       method.response.header.Access-Control-Allow-Origin: "'*'"
                 requestTemplates:
