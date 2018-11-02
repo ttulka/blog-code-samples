@@ -1,9 +1,9 @@
 AWSTemplateFormatVersion: "2010-09-09"
-Description: "Money"
+Description: "Money Example"
 
 Parameters:
 
-    ProjectName:
+  ProjectName:
     Type: String
     Description: Name of the project.
     MinLength: "1"
@@ -65,6 +65,40 @@ Resources:
             Resource: !GetAtt ExchangeLambda.Arn            
             Effect: Allow
 
+  ExchangeLambda:
+    Type: AWS::Lambda::Function
+    DependsOn: [ExchangeRole]
+    Properties:
+      FunctionName: !Sub "${ProjectName}-exchange-lambda"
+      Runtime: nodejs8.10
+      Handler: index.handler
+      MemorySize: 1024
+      Timeout: 120
+      Role: !GetAtt ExchangeRole.Arn
+      Code:
+        S3Bucket: !Ref ArtifactS3Bucket
+        S3Key: !Ref ExchangeLambdaS3Key
+
+  ExchangeRole:
+    Type: AWS::IAM::Role
+    Properties:
+      RoleName: !Sub "${ProjectName}-exchange-role"
+      Path: /
+      AssumeRolePolicyDocument:
+        Statement:
+        - Effect: Allow
+          Principal:
+            Service: [lambda.amazonaws.com]
+          Action: sts:AssumeRole
+      Policies:
+      - PolicyName: !Sub "${ProjectName}-exchange-policy"
+        PolicyDocument:
+          Version: 2012-10-17
+          Statement:
+          - Action: ["logs:*"]
+            Resource: !Sub "arn:aws:logs:${AWS::Region}:${AWS::AccountId}:log-group:/aws/lambda/*"
+            Effect: Allow
+
   MoneyApi:
     Type: AWS::ApiGateway::RestApi
     DependsOn: [MoneyApiRole, MoneyLambda]
@@ -89,7 +123,7 @@ Resources:
                 httpMethod: POST
                 contentHandling: CONVERT_TO_TEXT
                 type: aws_proxy
-                credentials: !GetAtt ApiRole.Arn
+                credentials: !GetAtt MoneyApiRole.Arn
             options:
               responses:
                 "200":
@@ -123,7 +157,7 @@ Resources:
                 httpMethod: POST
                 contentHandling: CONVERT_TO_TEXT
                 type: aws_proxy
-                credentials: !GetAtt ApiRole.Arn
+                credentials: !GetAtt MoneyApiRole.Arn
             options:
               responses:
                 "200":
@@ -168,7 +202,7 @@ Resources:
             Resource: !Sub "arn:aws:lambda:${AWS::Region}:${AWS::AccountId}:function:${MoneyLambda}*"
             Effect: Allow
           - Action: ["cloudwatch:*"]
-            Resource: "arn:aws:cloudwatch:${AWS::Region}:${AWS::AccountId}*"
+            Resource: !Sub "arn:aws:cloudwatch:${AWS::Region}:${AWS::AccountId}*"
             Effect: Allow
 
   MoneyApiDeployment:
