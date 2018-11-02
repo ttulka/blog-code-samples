@@ -58,7 +58,7 @@ function exchange() {
             const res = await lambda.invoke(params).promise()
             const payload = JSON.parse(res.Payload)
             
-            if (res.FunctionError || payload.error) throw new Error(res.Payload)
+            if (res.FunctionError) throw new Error(res.Payload)
             
             return payload.rate
         }    
