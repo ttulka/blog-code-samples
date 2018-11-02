@@ -7,10 +7,10 @@ describe('money system test suite', function() {
     it('multiplication test', async function() {
         const params = {
             money: {
-          		amount: 5,
-          		currency: 'USD'
-          	}, 
-          	multiplier: 2
+                amount: 5,
+                currency: 'USD'
+            }, 
+            multiplier: 2
         }
         const res = await axios.post(FACADE_URL + '/times', params)
         
@@ -24,10 +24,10 @@ describe('money system test suite', function() {
     it('reduction test', async function() {
         const params = {
             money: {
-          		amount: 5,
-          		currency: 'USD'
-          	}, 
-          	currency: 'EUR'
+                amount: 5,
+                currency: 'USD'
+            }, 
+            currency: 'EUR'
         }
         const res = await axios.post(FACADE_URL + '/reduce', params)
                 
