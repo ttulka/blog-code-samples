@@ -3,7 +3,7 @@
   "version": "1.0.0",
   "requires": true,
   "scripts": {
-    "test": "jasmine"
+    "test": "jasmine --config=jasmine.json"
   },
   "devDependencies": {
     "jasmine": "^3.1.0",

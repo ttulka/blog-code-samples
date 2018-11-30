@@ -6,7 +6,7 @@
   "scripts": {
     "build": "grunt build",
     "package": "grunt package",
-    "test": "jasmine"
+    "test": "jasmine --config=jasmine.json"
   },
   "devDependencies": {
     "grunt": "^1.0.2",
