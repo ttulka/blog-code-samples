@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" th:replace="~{fragments/layout :: layout (~{::body},'home')}">
+<body>
+
+<h2 th:text="#{orders}">Orders</h2>
+
+<table id="orders" class="table">
+    <thead>
+    <tr>
+        <th th:text="#{order.customer}">Customer</th>
+        <th th:text="#{order.itemsCount}">Items Count</th>
+    </tr>
+    </thead>
+    <tbody>
+    <tr th:each="order : ${orders}">
+        <td th:text="${order.customer.fullName  }"></td>
+        <td th:text="${order.itemsCount()}"></td>
+    </tr>
+    </tbody>
+</table>
+
+</body>
+</html>

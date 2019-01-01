@@ -1,0 +1,10 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" th:replace="~{fragments/layout :: layout (~{::body},'home')}">
+<body>
+
+<h2 th:text="#{orders}">Orders</h2>
+
+<div th:text="#{info.orderPlaced}">Order was successfully created.</div>
+
+</body>
+</html>

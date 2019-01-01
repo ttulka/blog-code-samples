@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xmlns="http://maven.apache.org/POM/4.0.0"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+    <groupId>cz.net21.ttulka.myshop</groupId>
+    <artifactId>modules</artifactId>
+    <version>0</version>
+    <packaging>pom</packaging>
+
+    <modules>
+        <module>parent</module>
+        <module>domain</module>
+        <module>db</module>
+        <module>web</module>   
+        <module>spring</module>
+        <module>spring-boot</module>     
+    </modules>
+
+</project>
