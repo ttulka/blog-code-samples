@@ -36,3 +36,8 @@ body {
 .form .form-group, form .form-group * {
     display: inline-block;
 }
+
+.message {
+    padding: 1em;
+    background-color: khaki;
+}

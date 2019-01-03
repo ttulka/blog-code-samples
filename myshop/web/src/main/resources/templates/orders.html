@@ -4,6 +4,8 @@
 
 <h2 th:text="#{orders}">Orders</h2>
 
+<div th:if="${message}" th:text="#{msg.__${message}__}" class="message"></div>
+
 <table id="orders" class="table">
     <thead>
     <tr>
