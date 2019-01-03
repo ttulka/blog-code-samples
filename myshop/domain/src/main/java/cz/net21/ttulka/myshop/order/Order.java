@@ -17,6 +17,10 @@ public class Order {
         return new Order(System.nanoTime(), new Customer(customerFullName));
     }
 
+    static Order constructOrder(long id, String customerFullName) {
+        return new Order(id, new Customer(customerFullName));
+    }
+
     public void addItem(long productId) {
         items.add(new OrderItem(productId));
     }

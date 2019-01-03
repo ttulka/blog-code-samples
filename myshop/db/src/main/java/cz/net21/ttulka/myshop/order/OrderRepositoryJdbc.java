@@ -16,12 +16,11 @@ class OrderRepositoryJdbc implements OrderRepository {
     public Collection<Order> listAll() {
         Collection<Order> orders = jdbcTemplate.query(
                 "SELECT id, customer FROM orders",
-                (rs, rowNum) -> new Order(
+                (rs, rowNum) -> Order.constructOrder(
                         rs.getLong("id"),
-                        new Customer(rs.getString("customer"))));
+                        rs.getString("customer")));
 
-        orders.forEach(order -> itemsForOrder(order.getId())
-                .forEach(order.getItems()::add));
+        orders.forEach(this::addItemsToOrder);
 
         return orders;
     }
@@ -31,21 +30,21 @@ class OrderRepositoryJdbc implements OrderRepository {
         Order order = jdbcTemplate.queryForObject(
                 "SELECT id, customer FROM orders WHERE id = ?",
                 new Object[]{id},
-                (rs, rowNum) -> new Order(
+                (rs, rowNum) -> Order.constructOrder(
                         rs.getLong("id"),
-                        new Customer(rs.getString("customer"))));
+                        rs.getString("customer")));
 
-        itemsForOrder(order.getId())
-                .forEach(order.getItems()::add);
+        addItemsToOrder(order);
 
         return order;
     }
 
-    private Collection<OrderItem> itemsForOrder(long orderId) {
-        return jdbcTemplate.query(
+    private void addItemsToOrder(Order order) {
+        jdbcTemplate.query(
                 "SELECT id FROM products JOIN orders_products ON id = product_id WHERE order_id = ?",
-                new Object[]{orderId},
-                (rs, rowNum) -> new OrderItem(rs.getLong("id")));
+                new Object[]{order.getId()},
+                (rs, rowNum) -> rs.getLong("id"))
+                .forEach(order::addItem);
     }
 
     @Override
