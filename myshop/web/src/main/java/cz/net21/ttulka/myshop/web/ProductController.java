@@ -18,7 +18,7 @@ class ProductController {
 
     private final ProductService productService;
 
-    @GetMapping("/")
+    @GetMapping("/products")
     public String list(String productName, Map<String, Object> model) {
         Collection<Product> products = StringUtils.isEmpty(productName)
                 ? productService.listAllProducts()
