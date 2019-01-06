@@ -1,0 +1,25 @@
+<!doctype html>
+<html th:fragment="layout (template, menu)">
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
+    <meta charset="utf-8">
+
+    <title>MyShop :: demo</title>
+
+    <link rel="shortcut icon" type="image/x-icon" th:href="@{/resources/images/favicon.png}">
+    <link rel="stylesheet" th:href="@{/resources/css/myshop.css}"/>
+</head>
+<body>
+
+<div class="navigation">
+    <a th:href="@{/products}" th:text="#{nav.products}">Products</a>
+    <a th:href="@{/orders}" th:text="#{nav.orders}">Orders</a>
+    <a th:href="@{/cart}" th:text="#{nav.cart}">Shopping Cart</a>
+</div>
+
+<div class="container-main">
+    <th:block th:include="${template}"/>
+</div>
+
+</body>
+</html>

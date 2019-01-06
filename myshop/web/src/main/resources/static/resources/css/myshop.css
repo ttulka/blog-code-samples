@@ -1,0 +1,43 @@
+body {
+    font-family: sans-serif;
+    padding: 0.5em 2em;
+}
+
+.navigation {
+    background-color: cornflowerblue;
+    padding: 0 1em;
+}
+.navigation a {
+    display: inline-block;
+    padding: 1em;
+    font-weight: bold;
+    text-decoration: none;
+    color: midnightblue;
+}
+.navigation a:hover {
+    text-decoration: underline;
+}
+
+.table {
+    border-collapse: collapse;
+    margin: 1em 0;
+    background-color: aliceblue;
+}
+.table th, .table td {
+    border: 1px solid midnightblue;
+    padding: 0.5em 1em;
+}
+
+.form {
+    display: inline-block;
+    padding: 1em;
+    background-color: beige;
+}
+.form .form-group, form .form-group * {
+    display: inline-block;
+}
+
+.message {
+    padding: 1em;
+    background-color: khaki;
+}

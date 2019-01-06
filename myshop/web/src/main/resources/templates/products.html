@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" th:replace="~{fragments/layout :: layout (~{::body},'home')}">
+<body>
+
+<h2 th:text="#{products}">Products</h2>
+
+<form th:action="@{/}" method="get" class="form">
+    <div class="form-group">
+        <div>
+            <label th:text="#{product.name}">Name</label>
+            <div>
+                <input name="productName" size="30" maxlength="80"/>
+            </div>
+        </div>
+    </div>
+    <div class="form-group">
+        <div>
+            <button type="submit" th:text="#{control.find}">Find</button>
+        </div>
+    </div>
+</form>
+
+<form th:action="@{/cart}" method="get">
+    <table id="products" class="table">
+        <thead>
+        <tr>
+            <th th:text="#{product.name}">Title</th>
+            <th th:text="#{product.description}">Author</th>
+            <th th:text="#{product.price}">Price</th>
+        </tr>
+        </thead>
+        <tbody>
+        <tr th:each="product : ${products}">
+            <td th:text="${product.name}"></td>
+            <td th:text="${product.description}"></td>
+            <td th:text="${product.price} + ' $'"></td>
+            <td><button name="productId" th:value="${product.id}" th:text="#{control.buy}">Buy</button></td>
+        </tr>
+        </tbody>
+    </table>
+</form>
+
+</body>
+</html>
