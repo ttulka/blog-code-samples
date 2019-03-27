@@ -6,6 +6,17 @@
     <groupId>cz.net21.ttulka.myshop</groupId>
     <artifactId>domain</artifactId>
     <version>0</version>
+
+    <parent>
+        <groupId>cz.net21.ttulka.myshop</groupId>
+        <artifactId>parent</artifactId>
+        <version>0</version>
+        <relativePath>../parent/pom.xml</relativePath>
+    </parent>
+
+    <dependencies>
+    </dependencies>
+    
     <build>
         <plugins>
             <plugin>
@@ -18,16 +29,6 @@
             </plugin>
         </plugins>
     </build>
-
-    <parent>
-        <groupId>cz.net21.ttulka.myshop</groupId>
-        <artifactId>parent</artifactId>
-        <version>0</version>
-        <relativePath>../parent/pom.xml</relativePath>
-    </parent>
-
-    <dependencies>
-    </dependencies>
 
     <licenses>
         <license>
