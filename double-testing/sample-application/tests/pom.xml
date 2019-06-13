@@ -1,0 +1,165 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+    <parent>
+        <groupId>com.ttulka.samples.doubletesting</groupId>
+        <artifactId>sample-application-parent</artifactId>
+        <version>0</version>
+        <relativePath>../build/pom.xml</relativePath>
+    </parent>
+
+    <artifactId>sample-application-tests</artifactId>
+
+    <properties>
+        <pathToPid>${project.build.directory}/sample-app.pid</pathToPid>
+    </properties>
+
+    <dependencies>
+        <dependency>
+            <groupId>com.ttulka.samples.doubletesting</groupId>
+            <artifactId>sample-application</artifactId>
+            <version>0</version>
+            <scope>provided</scope>
+            <exclusions>
+                <exclusion>
+                    <groupId>*</groupId>
+                    <artifactId>*</artifactId>
+                </exclusion>
+            </exclusions>
+        </dependency>
+        <!--        <dependency>-->
+        <!--            <groupId>com.ttulka.samples.doubletesting</groupId>-->
+        <!--            <artifactId>sample-component</artifactId>-->
+        <!--            <version>0</version>-->
+        <!--            <type>test-jar</type>-->
+        <!--            <scope>test</scope>-->
+        <!--        </dependency>-->
+        <dependency>
+            <groupId>org.junit.jupiter</groupId>
+            <artifactId>junit-jupiter-api</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.junit.jupiter</groupId>
+            <artifactId>junit-jupiter-engine</artifactId>
+            <scope>test</scope>
+        </dependency>
+
+    </dependencies>
+
+    <build>
+        <plugins>
+            <plugin>
+                <artifactId>maven-failsafe-plugin</artifactId>
+                <configuration>
+                    <classpathDependencyExcludes>
+                        <classpathDependencyExcludes>com.ttulka.samples.doubletesting:SampleApplication</classpathDependencyExcludes>
+                    </classpathDependencyExcludes>
+                    <includes>
+                        <include>**/*IT.java</include>
+                    </includes>
+                </configuration>
+                <executions>
+                    <execution>
+                        <goals>
+                            <goal>integration-test</goal>
+                            <goal>verify</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+            <plugin>
+                <artifactId>maven-antrun-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <id>start-application</id>
+                        <phase>pre-integration-test</phase>
+                        <configuration>
+                            <target>
+                                <echo message="Starting the application..."/>
+
+                                <condition property="java.executable" value="${java.home}/bin/javaw.exe" else="${java.home}/bin/java">
+                                    <os family="windows"/>
+                                </condition>
+
+                                <exec executable="${java.executable}" spawn="true" failonerror="false">
+                                    <arg value="-Xmx512m"/>
+                                    <arg value="-Dspring.pid.file=${pathToPid}"/>
+                                    <arg value="-Dspring.profiles.active=default"/>
+                                    <arg value="-jar"/>
+                                    <arg value="${com.ttulka.samples.doubletesting:sample-application:jar}"/>
+                                    <arg value="--logging.level.com.ttulka.samples.doubletesting=DEBUG"/>
+                                </exec>
+
+                                <echo message="Waiting for the application PID file..."/>
+
+                                <waitfor maxwait="120" maxwaitunit="second" checkevery="500" timeoutproperty="appStartFailed">
+                                    <available file="${pathToPid}"/>
+                                </waitfor>
+
+                                <fail message="Application didn't start.">
+                                    <condition>
+                                        <isset property="appStartFailed"/>
+                                    </condition>
+                                </fail>
+
+                                <echo message="Application sucessfully started."/>
+                            </target>
+                        </configuration>
+                        <goals>
+                            <goal>run</goal>
+                        </goals>
+                    </execution>
+                    <execution>
+                        <id>stop-application</id>
+                        <phase>post-integration-test</phase>
+                        <configuration>
+                            <target>
+                                <echo message="Stopping the application..."/>
+
+                                <loadfile srcfile="${pathToPid}" property="app.pid"/>
+
+                                <exec executable="taskkill" osfamily="windows">
+                                    <arg line="/T /F /PID ${app.pid} ${line.separator}exit /B 0"/>
+                                </exec>
+                                <exec executable="kill" osfamily="unix">
+                                    <arg line="-15 ${app.pid}"/>
+                                </exec>
+
+                                <echo message="Application sucessfully stopped."/>
+                            </target>
+                        </configuration>
+                        <goals>
+                            <goal>run</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+            <plugin>
+                <artifactId>maven-install-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <id>default-install</id>
+                        <phase>none</phase>
+                    </execution>
+                </executions>
+            </plugin>
+        </plugins>
+    </build>
+
+    <licenses>
+        <license>
+            <name>The Apache Software License, Version 2.0</name>
+            <url>http://www.apache.org/licenses/LICENSE-2.0.txt</url>
+        </license>
+    </licenses>
+
+    <developers>
+        <developer>
+            <name>Tomas Tulka</name>
+            <url>https://github.com/ttulka</url>
+        </developer>
+    </developers>
+
+</project>
