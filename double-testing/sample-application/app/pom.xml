@@ -3,15 +3,21 @@
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
     <modelVersion>4.0.0</modelVersion>
     <parent>
-        <groupId>com.ttulka.samples.doubletesting</groupId>
-        <artifactId>sample-application-parent</artifactId>
-        <version>0</version>
-        <relativePath>../build/pom.xml</relativePath>
+        <groupId>org.springframework.boot</groupId>
+        <artifactId>spring-boot-starter-parent</artifactId>
+        <version>2.1.5.RELEASE</version>
     </parent>
 
+    <groupId>com.ttulka.samples.doubletesting</groupId>
     <artifactId>sample-application</artifactId>
+    <version>0</version>
 
     <dependencies>
+        <dependency>
+            <groupId>com.ttulka.samples.doubletesting</groupId>
+            <artifactId>sample-component-web1</artifactId>
+            <version>0</version>
+        </dependency>
         <dependency>
             <groupId>org.projectlombok</groupId>
             <artifactId>lombok</artifactId>
@@ -22,6 +28,15 @@
             <artifactId>spring-boot-starter-web</artifactId>
         </dependency>
     </dependencies>
+
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>org.springframework.boot</groupId>
+                <artifactId>spring-boot-maven-plugin</artifactId>
+            </plugin>
+        </plugins>
+    </build>
 
     <licenses>
         <license>

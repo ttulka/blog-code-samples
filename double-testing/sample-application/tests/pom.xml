@@ -4,9 +4,9 @@
     <modelVersion>4.0.0</modelVersion>
     <parent>
         <groupId>com.ttulka.samples.doubletesting</groupId>
-        <artifactId>sample-application-parent</artifactId>
+        <artifactId>doubletesting-parent</artifactId>
         <version>0</version>
-        <relativePath>../build/pom.xml</relativePath>
+        <relativePath>../../build/pom.xml</relativePath>
     </parent>
 
     <artifactId>sample-application-tests</artifactId>
@@ -120,10 +120,10 @@
 
                                 <loadfile srcfile="${pathToPid}" property="app.pid"/>
 
-                                <exec executable="taskkill" osfamily="windows">
-                                    <arg line="/T /F /PID ${app.pid} ${line.separator}exit /B 0"/>
+                                <exec executable="taskkill" osfamily="windows" failonerror="true">
+                                    <arg line="/T /F /PID ${app.pid}"/>
                                 </exec>
-                                <exec executable="kill" osfamily="unix">
+                                <exec executable="kill" osfamily="unix" failonerror="true">
                                     <arg line="-15 ${app.pid}"/>
                                 </exec>
 

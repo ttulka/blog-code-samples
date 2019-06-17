@@ -9,7 +9,6 @@
     <packaging>pom</packaging>
 
     <modules>
-        <module>build</module>
         <module>app</module>
     </modules>
 
