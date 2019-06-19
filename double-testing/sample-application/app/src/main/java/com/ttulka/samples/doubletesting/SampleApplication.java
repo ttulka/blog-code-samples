@@ -10,7 +10,6 @@ import org.springframework.context.annotation.Import;
 
 @SpringBootConfiguration
 @EnableAutoConfiguration
-@Import(IndexController.class) // remove me!!!
 public class SampleApplication {
 
     public static void main(String[] args) {

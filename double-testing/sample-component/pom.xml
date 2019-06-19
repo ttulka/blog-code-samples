@@ -10,6 +10,9 @@
 
     <modules>
         <module>web1</module>
+        <module>web1-spring-boot-starter</module>
+        <module>web2</module>
+        <module>web2-spring-boot-starter</module>
     </modules>
 
 </project>
