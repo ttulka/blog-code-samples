@@ -1,12 +1,16 @@
 package com.ttulka.samples.doubletesting.web1;
 
-import org.junit.jupiter.api.Tag;
-import org.junit.jupiter.api.extension.ExtendWith;
+import org.springframework.context.annotation.Configuration;
+import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.TestPropertySource;
-import org.springframework.test.context.junit.jupiter.SpringExtension;
+import org.springframework.test.context.junit.jupiter.SpringJUnitConfig;
 
-@ExtendWith(SpringExtension.class)
+@SpringJUnitConfig
 @TestPropertySource(properties = "doubletesting.path.web1=web1")
-@Tag("IntegrationTest")
-public class IndexIT extends IndexBaseTest {
+class IndexIT extends IndexTestBase {
+
+    @Configuration
+    static class ITConfig {
+        // intentionally empty
+    }
 }

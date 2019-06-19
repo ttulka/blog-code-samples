@@ -8,5 +8,5 @@ import org.springframework.boot.test.context.SpringBootTest;
         webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT
 )
 @EnableAutoConfiguration
-public class IndexTest extends IndexBaseTest {
+class IndexTest extends IndexTestBase {
 }
