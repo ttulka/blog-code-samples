@@ -24,6 +24,7 @@ test-args.txt
 ~*.docx
 \#*\#
 .\#*
+*.pid
 tests/baselines/local/*
 tests/baselines/local.old/*
 tests/services/baselines/local/*
@@ -72,7 +73,6 @@ internal/
 !tests/cases/projects/projectOption/**/node_modules
 !tests/cases/projects/NodeModulesSearch/**/*
 !tests/baselines/reference/project/nodeModules*/**/*
-.idea
 yarn.lock
 yarn-error.log
 .parallelperf.*
