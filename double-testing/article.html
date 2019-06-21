@@ -1,0 +1,152 @@
+Double Testing
+---
+<p>Write your tests once and run them twice - as both unit and integration tests - sounds like a good deal, let's take a look at this practice.</p>
+---
+
+<p>This article focuses on Java, Spring framework and Maven.</p>
+
+<p>We have a modular application with two independent String MVC web components. We created a Spring Boot starter for each component to bring them together in a monolithic Spring Boot application.</p>
+
+<p>Each web component has its own set of tests. We have some <a href="http://rest-assured.io/" target="_blank">REST-Assured</a> tests for REST-based endpoints and Selenium-based tests for testing requests in the end-to-end manner (we check whether expected elements are present on the page).</p>
+
+<p>To run the tests independently as a part of the component build process we have to simulate the web environment and to mock (or somehow else provide) all needed resources. We can achieve this with <code>@SpringBootTest</code>:</p>
+<pre class="brush: java">
+@SpringBootTest(
+        classes = IndexController.class /* this is what we test */,	
+        webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT
+)
+@EnableAutoConfiguration
+class IndexTest {
+
+    @Value("http://localhost:${local.server.port:8080}")
+    private String url;
+	
+	@Test
+    void indexResource_shouldContainWeb1() {
+        given()
+                .baseUri(url)
+                .basePath("/").
+        when()
+                .get().
+        then()
+                .statusCode(200)
+                .contentType("text/plain")
+                .body(containsString("Web1"));
+    }
+}
+</pre>
+<p>If you don't (or can't) include <code>@EnableAutoConfiguration</code> you can create your own annotation with a minimal web configuration from <code>spring-boot-starter-web</code>:
+<pre class="brush: java">
+    @Target(ElementType.TYPE)
+    @Retention(RetentionPolicy.RUNTIME)
+    @Documented
+    @Configuration
+    @Import({
+        ServletWebServerFactoryAutoConfiguration.class,
+        DispatcherServletAutoConfiguration.class,
+        WebMvcAutoConfiguration.class
+    })
+    @interface MinimalWebConfiguration {
+    }
+</pre>    
+<p>To be sure that a component works in the application as well as running standalone, we can use the same tests, this time executed against the application. Let's call them integration tests and run them in a further phase of the application delivery process.</p> 
+<p>Let's create an abstract class containing the whole test code:</p>
+<pre class="brush: java">
+abstract class IndexTestBase {
+    @Test
+    void indexResource_shouldContainWeb1() {
+        // the test code...
+    }
+}
+</pre>    
+<p>Standalone (unit) tests use this base:</p>
+<pre class="brush: java">
+// Spring Boot settings as above...
+class IndexTest extends IndexTestBase {
+	// noting else in this class
+}
+</pre>
+<p>As well as the integration tests:</p>
+<pre class="brush: java">
+@SpringJUnitConfig
+class IndexIT extends IndexTestBase {
+    @Configuration
+    static class ITConfig {
+        // intentionally empty
+    }
+}
+</pre>
+<p>Alternatively to <code>@SpringJUnitConfig</code> you can use <code>@ExtendWith(SpringExtension.class)</code> together with <code>@ContextConfiguration</code> to gain a better overlook.</p>
+
+<p><code>IndexTest</code> is executed by Maven Surefire Plugin in the <code>test</code> phase, but <code>IndexIT</code> integration test is ignored by Surefire because it doesn't match the default naming pattern (<code>*Test</code>).</p>
+
+<h2>Application Integration</h2>
+<p>Web components are integrated into the application by adding their Spring Boot Starters as dependencies:
+<pre class="brush: xml">
+&lt;dependency&gt;
+	&lt;groupId&gt;com.ttulka.samples.doubletesting&lt;/groupId&gt;
+	&lt;artifactId&gt;sample-component-web1-spring-boot-starter&lt;/artifactId&gt;
+&lt;/dependency&gt;
+</pre>
+<p>And setting different URL paths:</p>
+<pre class="brush: java">
+@RestController("indexControllerWeb1")	/* unique name to avoid a bean collision */
+@RequestMapping("${doubletesting.path.web1:}")	/* integrated under an unique url path */
+public class IndexController {
+	// endpoints definition...
+}
+</pre>
+<pre class="brush: yaml">
+# application.yml
+doubletesting.path:
+  web1: web1
+  web2: web2
+</pre>
+
+<h2>Running Integration Tests</h2>
+<p>Integration tests should run in a later phase of the application delivery process than unit tests. The reason is, integration tests are generally slower than unit tests (mainly due to time needed for building the environment) and running them in an earlier phase would delay the feedback, which is highly undesirable.</p>
+<p>We create a separate Maven module not included in the build phase at all, skipped with <code>-DskipITs</code> or alternatively by settings of a build profile.</p>
+<p>To run the tests from a component, first we have to collect them and include as a dependency. We use Maven JAR Plugin and its goal <code>test-jar</code> for that:
+<pre class="brush: xml">
+&lt;!-- pom.xml of a component --&gt;
+&lt;build&gt;
+	&lt;plugins&gt;
+		&lt;plugin&gt;
+			&lt;artifactId&gt;maven-jar-plugin&lt;/artifactId&gt;
+			&lt;executions&gt;
+				&lt;execution&gt;
+					&lt;id&gt;test-jar&lt;/id&gt;
+					&lt;goals&gt;
+						&lt;goal&gt;test-jar&lt;/goal&gt;
+					&lt;/goals&gt;
+				&lt;/execution&gt;
+			&lt;/executions&gt;
+		&lt;/plugin&gt;
+	&lt;/plugins&gt;
+&lt;/build&gt;
+</pre>
+<p>The plugin collects all the tests as a separate artifact, we then include in the integration test module:</p>
+<pre class="brush: xml">
+&lt;!-- pom.xml of the integration tests module --&gt;
+&lt;dependencies&gt;
+	&lt;dependency&gt;
+		&lt;groupId&gt;com.ttulka.samples.doubletesting&lt;/groupId&gt;
+		&lt;artifactId&gt;sample-component-web1&lt;/artifactId&gt;
+		&lt;version&gt;0&lt;/version&gt;
+		&lt;type&gt;test-jar&lt;/type&gt;
+		&lt;scope&gt;test&lt;/scope&gt;
+	&lt;/dependency&gt;
+	&lt;!-- other dependencies... --&gt;
+&lt;/dependencies&gt;	
+</pre>
+<p>Then, all we need is to copy test classes with Maven Dependency Plugin and prepare the environment. We use Maven Failsafe Plugin and its phases <code>pre-integration-test</code> to start the application and <code>post-integration-test</code> to stop it and clean resources.</p>
+<p><code>IndexIT</code> will be executed automatically because it matches Failsafe naming pattern (<code>*IT</code>). Alternatively we can use tagging from JUnit 5 (<code>@Tag("integration")</code>) together with Failsafe configuration (<code>groups</code>) for a finer control of test executions.</p>
+<p>We have to include all the test dependencies into the test pom.xml as dependencies with scope <code>test</code> don't come transitively.</p>
+
+<p><img src="https://raw.githubusercontent.com/ttulka/blog-assets/master/double-testing.png" alt="Double Testing"/></p>
+
+<p>A working sample project can be found on <a href="https://github.com/ttulka/blog-code-samples/tree/master/double-testing" target="_blank">my Github</a>.</p>
+
+<p>And that's it! One test code base, two different executions - unit and integration.</p>
+<p>Keep on testing!</p>
+  
