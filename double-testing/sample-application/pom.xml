@@ -10,6 +10,7 @@
 
     <modules>
         <module>app</module>
+        <module>tests</module>
     </modules>
 
 </project>

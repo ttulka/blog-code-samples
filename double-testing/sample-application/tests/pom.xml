@@ -6,7 +6,7 @@
         <groupId>com.ttulka.samples.doubletesting</groupId>
         <artifactId>doubletesting-parent</artifactId>
         <version>0</version>
-        <relativePath>../../build/pom.xml</relativePath>
+        <relativePath>../../parent/pom.xml</relativePath>
     </parent>
 
     <artifactId>sample-application-tests</artifactId>
@@ -74,9 +74,6 @@
                     <classpathDependencyExcludes>
                         <classpathDependencyExcludes>com.ttulka.samples.doubletesting:SampleApplication</classpathDependencyExcludes>
                     </classpathDependencyExcludes>
-                    <includes>
-                        <include>**/*IT.java</include>
-                    </includes>
                 </configuration>
                 <executions>
                     <execution>
@@ -89,6 +86,9 @@
             </plugin>
             <plugin>
                 <artifactId>maven-dependency-plugin</artifactId>
+                <configuration>
+                    <skip>${skipITs}</skip>
+                </configuration>
                 <executions>
                     <execution>
                         <id>unpack-test-classes</id>
@@ -107,6 +107,9 @@
             </plugin>
             <plugin>
                 <artifactId>maven-antrun-plugin</artifactId>
+                <configuration>
+                    <skip>${skipITs}</skip>
+                </configuration>
                 <executions>
                     <execution>
                         <id>start-application</id>
