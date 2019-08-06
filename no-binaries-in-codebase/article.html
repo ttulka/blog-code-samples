@@ -1,0 +1,55 @@
+<h1>No Binaries in the Codebase</h1>
+
+<p>Binary data shouldn't be a part of the codebase. This is pretty well-known practice. But how to proceed when we do need binaries in our codebase, for instance as test data?</p>
+
+<hr />
+
+<p>The solution is straight-forward: Pack binary resources into an artifact separated from the codebase in a repository.</p>
+<p>A good practice is to use a <strong>special classifier</strong> for all the artifacts of this kind, for instance <code>testdata</code>.</p>
+
+<p>After uploading the resources artifact into a repository (manually or via an API), we can use it as a dependency in our codebase (Maven):</p>
+<pre>
+&lt;plugin&gt;
+  &lt;groupId&gt;org.apache.maven.plugins&lt;/groupId&gt;
+  &lt;artifactId&gt;maven-dependency-plugin&lt;/artifactId&gt;
+  &lt;executions&gt;
+    &lt;execution&gt;
+      &lt;id&gt;unpack-test-resources&lt;/id&gt;
+      &lt;phase&gt;process-test-resources&lt;/phase&gt;
+      &lt;goals&gt;
+        &lt;goal&gt;unpack&lt;/goal&gt;
+      &lt;/goals&gt;
+      &lt;configuration&gt;
+        &lt;outputDirectory&gt;${project.build.directory}/test-classes&lt;/outputDirectory&gt;
+        &lt;artifactItems&gt;
+          &lt;artifactItem&gt;
+            &lt;groupId&gt;com.ttulka.samples.testdata&lt;/groupId&gt;
+            &lt;artifactId&gt;sample-test-resources&lt;/artifactId&gt;
+            &lt;version&gt;1.0.0&lt;/version&gt;
+            &lt;classifier&gt;testdata&lt;/classifier&gt;
+            &lt;type&gt;zip&lt;/type&gt;
+          &lt;/artifactItem&gt;
+        &lt;/artifactItems&gt;
+      &lt;/configuration&gt;
+    &lt;/execution&gt;
+  &lt;/executions&gt;
+&lt;/plugin&gt;
+</pre>
+<p>The Maven plugin will download and unpack the resources into the test classpath before the test are actually executed.</p>
+<p>Binaries are then available in the codebase (Java):</p>
+<pre>
+this.getClass().getResource("/resource1.dat");
+</pre>
+
+<p>Another good practice is to create a <strong>domain-based resources structure</strong> inside the artifacts. Just put the resources into a sub-folder:</p>
+<pre>
+domainA.zip
+┕ domainA/
+  ┕ resource1.dat
+  ┕ resource2.dat
+</pre>
+<p>This organization enables composition of resources in the <a href="/double-testing-130">integration testing</a>.</p>
+
+<p>The example code could be found in <a href="https://github.com/ttulka/blog-code-samples/tree/master/no-binaries-in-codebase/textfile">my GitHub</a>.</p>
+
+<p>Happy resourcing!</p>
