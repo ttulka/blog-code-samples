@@ -1,0 +1,4 @@
+CREATE TABLE results (
+  id INT AUTO_INCREMENT  PRIMARY KEY,
+  result VARCHAR(250),
+);
