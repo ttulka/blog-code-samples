@@ -26,9 +26,11 @@ class BatchProcessingTest {
 
     @Test
     @SneakyThrows
-    void test() {
+    void amountOfLoadedEqualsProduced() {
         final BatchProcessing batchProcessing = new BatchProcessing(100, jdbcTemplate);
         final ExecutorService executor = Executors.newCachedThreadPool();
+        
+        long start = System.currentTimeMillis();
 
         IntStream.range(0, COMPUTING_AMOUNT)
                 .mapToObj(String::valueOf)
@@ -40,6 +42,8 @@ class BatchProcessingTest {
         }
 
         batchProcessing.finish();
+        
+        System.out.println("Duration: " + (System.currentTimeMillis() - start));
 
         assertEquals(COMPUTING_AMOUNT, (int) jdbcTemplate.queryForObject("SELECT COUNT(*) FROM results", Integer.class));
     }
