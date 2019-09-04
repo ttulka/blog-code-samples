@@ -12,16 +12,21 @@ import org.springframework.jdbc.core.JdbcTemplate;
 
 import lombok.RequiredArgsConstructor;
 
-@RequiredArgsConstructor
 class BatchLoaderUnsafe {
 
     private final int batchSize;
     private final JdbcTemplate jdbcTemplate;
 
-    private final Collection<String> resultsBatch = new HashSet<>();
+    private final List<String> resultsBatch;
     private int counter = 0;
 
     private boolean finished = false;
+
+    public BatchLoaderUnsafe(int batchSize, JdbcTemplate jdbcTemplate) {
+        this.batchSize = batchSize;
+        this.jdbcTemplate = jdbcTemplate;
+        this.resultsBatch = new ArrayList<>(batchSize);
+    }
 
     public void load(String result) {
         resultsBatch.add(result);
@@ -37,23 +42,22 @@ class BatchLoaderUnsafe {
     }
 
     private void batchLoad() {
-        List<String> batch = new ArrayList<>(resultsBatch);
-        resultsBatch.removeAll(batch);
-        counter = 0;
-
         jdbcTemplate.batchUpdate("INSERT INTO results (result) VALUES (?)", new BatchPreparedStatementSetter() {
             @Override
             public void setValues(PreparedStatement ps, int i) throws SQLException {
-                ps.setString(1, batch.get(i));
+                ps.setString(1, resultsBatch.get(i));
             }
 
             @Override
             public int getBatchSize() {
-                return batch.size();
+                return resultsBatch.size();
             }
         });
 
         // expensive work
-        batch.forEach(s -> new ExpensiveWorker(s).work());
+        resultsBatch.forEach(s -> new ExpensiveWorker(s).work());
+
+        counter = 0;
+        resultsBatch.clear();
     }
 }
