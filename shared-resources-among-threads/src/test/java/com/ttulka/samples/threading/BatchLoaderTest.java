@@ -32,8 +32,7 @@ class BatchLoaderTest {
     private JdbcTemplate jdbcTemplate;
 
     @ParameterizedTest
-//    @ValueSource(ints = {1, 2, 4})
-    @ValueSource(ints = {4})
+    @ValueSource(ints = {1, 2, 4})
     @SneakyThrows
     void instancePerThread_amountOfLoadedEqualsExtracted(int threads) {
         final Map<Long, BatchLoaderUnsafe> batchLoaders = new ConcurrentHashMap<>();
