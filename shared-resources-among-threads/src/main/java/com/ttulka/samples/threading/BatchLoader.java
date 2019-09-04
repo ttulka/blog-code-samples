@@ -3,15 +3,9 @@ package com.ttulka.samples.threading;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.util.ArrayList;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Random;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ConcurrentSkipListSet;
-import java.util.concurrent.atomic.AtomicInteger;
 
 import org.springframework.jdbc.core.BatchPreparedStatementSetter;
 import org.springframework.jdbc.core.JdbcTemplate;
@@ -57,11 +51,11 @@ class BatchLoader {
             }
         });
 
+        // expensive work
+        data.resultsBatch.forEach(s -> new ExpensiveWorker(s).work());
+
         data.counter = 0;
         data.resultsBatch.clear();
-
-        // expensive work
-        new ExpensiveWorker().work();
     }
 
     private ThreadsData data() {

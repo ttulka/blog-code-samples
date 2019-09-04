@@ -6,9 +6,6 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
-import java.util.Random;
-import java.util.concurrent.ConcurrentSkipListSet;
-import java.util.concurrent.atomic.AtomicInteger;
 
 import org.springframework.jdbc.core.BatchPreparedStatementSetter;
 import org.springframework.jdbc.core.JdbcTemplate;
@@ -57,6 +54,6 @@ class BatchLoaderUnsafe {
         });
 
         // expensive work
-        new ExpensiveWorker().work();
+        batch.forEach(s -> new ExpensiveWorker(s).work());
     }
 }

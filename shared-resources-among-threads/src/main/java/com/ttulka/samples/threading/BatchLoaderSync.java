@@ -5,7 +5,6 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
-import java.util.Random;
 import java.util.concurrent.ConcurrentSkipListSet;
 import java.util.concurrent.atomic.AtomicInteger;
 
@@ -56,6 +55,6 @@ class BatchLoaderSync {
         });
 
         // expensive work
-        new ExpensiveWorker().work();
+        batch.forEach(s -> new ExpensiveWorker(s).work());
     }
 }
