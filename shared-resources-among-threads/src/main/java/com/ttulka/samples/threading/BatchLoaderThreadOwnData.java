@@ -13,32 +13,30 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import lombok.RequiredArgsConstructor;
 
 @RequiredArgsConstructor
-class BatchLoader {
+class BatchLoaderThreadOwnData {
 
     private final int batchSize;
     private final JdbcTemplate jdbcTemplate;
 
     private boolean finished = false;
 
-    private final Map<Long, ThreadsData> threadsData = new ConcurrentHashMap<>();
+    private final Map<Long, ThreadOwnData> threadOwnDataMap = new ConcurrentHashMap<>();
 
     public void load(String result) {
-        data().resultsBatch.add(result);
+        threadOwnData().resultsBatch.add(result);
 
-        if (finished || data().counter++ >= batchSize) {
-            batchLoad(data());
+        if (finished || threadOwnData().counter++ >= batchSize) {
+            batchLoad(threadOwnData());
         }
     }
 
     public void finish() {
         finished = true;
-        threadsData.values().forEach(data -> {
-            batchLoad(data);
-        });
+        threadOwnDataMap.values().forEach(this::batchLoad);
 
     }
 
-    private void batchLoad(ThreadsData data) {
+    private void batchLoad(ThreadOwnData data) {
         jdbcTemplate.batchUpdate("INSERT INTO results (result) VALUES (?)", new BatchPreparedStatementSetter() {
             @Override
             public void setValues(PreparedStatement ps, int i) throws SQLException {
@@ -58,16 +56,16 @@ class BatchLoader {
         data.resultsBatch.clear();
     }
 
-    private ThreadsData data() {
-        return threadsData.computeIfAbsent(Thread.currentThread().getId(), id -> new ThreadsData(batchSize));
+    private ThreadOwnData threadOwnData() {
+        return threadOwnDataMap.computeIfAbsent(Thread.currentThread().getId(), id -> new ThreadOwnData(batchSize));
     }
 
-    static class ThreadsData {
+    static class ThreadOwnData {
 
         public final List<String> resultsBatch;
         public int counter = 0;
 
-        public ThreadsData(int batchSize) {
+        public ThreadOwnData(int batchSize) {
             resultsBatch = new ArrayList<>(batchSize);
         }
     }
