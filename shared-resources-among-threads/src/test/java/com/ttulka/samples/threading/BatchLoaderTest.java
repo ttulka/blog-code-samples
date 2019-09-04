@@ -1,5 +1,8 @@
 package com.ttulka.samples.threading;
 
+import java.util.HashMap;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
@@ -7,6 +10,8 @@ import java.util.stream.IntStream;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.jdbc.core.JdbcTemplate;
@@ -20,50 +25,56 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 @ContextConfiguration(classes = BatchLoaderTest.TestConfig.class)
 class BatchLoaderTest {
 
-    private static final int COMPUTING_AMOUNT = 1_000_000;
+    private static final int AMOUNT = 1_000_000;
     private static final int BATCH_SIZE = 10_000;
 
     @Autowired
     private JdbcTemplate jdbcTemplate;
 
-    @Test
+    @ParameterizedTest
+//    @ValueSource(ints = {1, 2, 4})
+    @ValueSource(ints = {4})
     @SneakyThrows
-    void threadOwnData_amountOfLoadedEqualsExtracted() {
-        final BatchLoader batchLoader = new BatchLoader(BATCH_SIZE, jdbcTemplate);
-        final ExecutorService executor = Executors.newFixedThreadPool(2);
+    void instancePerThread_amountOfLoadedEqualsExtracted(int threads) {
+        final Map<Long, BatchLoaderUnsafe> batchLoaders = new ConcurrentHashMap<>();
+        final ExecutorService executor = Executors.newFixedThreadPool(threads);
 
         long start = System.currentTimeMillis();
 
-        IntStream.range(0, COMPUTING_AMOUNT)    // extract
+        IntStream.range(0, AMOUNT)    // extract
                 .mapToObj(String::valueOf)      // transform
-                .forEach(i -> executor.execute(() -> batchLoader.load(i))); // load
+                .forEach(i -> executor.execute(
+                        () -> batchLoaders.computeIfAbsent(Thread.currentThread().getId(),
+                                                           id -> new BatchLoaderUnsafe(BATCH_SIZE, jdbcTemplate))
+                                .load(i))); // load
 
         executor.shutdown();
-        if (!executor.awaitTermination(1, TimeUnit.MINUTES)) {
+        if (!executor.awaitTermination(5, TimeUnit.MINUTES)) {
             executor.shutdownNow();
         }
 
-        batchLoader.finish();
+        batchLoaders.values().forEach(BatchLoaderUnsafe::finish);
 
         System.out.println("Duration: " + (System.currentTimeMillis() - start));
 
-        assertEquals(COMPUTING_AMOUNT, (int) jdbcTemplate.queryForObject("SELECT COUNT(*) FROM results", Integer.class));
+        assertEquals(AMOUNT, (int) jdbcTemplate.queryForObject("SELECT COUNT(DISTINCT result) FROM results", Integer.class));
     }
 
-    @Test
+    @ParameterizedTest
+    @ValueSource(ints = {1, 2, 4})
     @SneakyThrows
-    void synchronized_amountOfLoadedEqualsExtracted() {
-        final BatchLoaderSync batchLoader = new BatchLoaderSync(BATCH_SIZE, jdbcTemplate);
-        final ExecutorService executor = Executors.newFixedThreadPool(2);
+    void threadOwnData_amountOfLoadedEqualsExtracted(int threads) {
+        final BatchLoaderThreadOwnData batchLoader = new BatchLoaderThreadOwnData(BATCH_SIZE, jdbcTemplate);
+        final ExecutorService executor = Executors.newFixedThreadPool(threads);
 
         long start = System.currentTimeMillis();
 
-        IntStream.range(0, COMPUTING_AMOUNT)    // extract
+        IntStream.range(0, AMOUNT)    // extract
                 .mapToObj(String::valueOf)      // transform
                 .forEach(i -> executor.execute(() -> batchLoader.load(i))); // load
 
         executor.shutdown();
-        if (!executor.awaitTermination(1, TimeUnit.MINUTES)) {
+        if (!executor.awaitTermination(5, TimeUnit.MINUTES)) {
             executor.shutdownNow();
         }
 
@@ -71,7 +82,32 @@ class BatchLoaderTest {
 
         System.out.println("Duration: " + (System.currentTimeMillis() - start));
 
-        assertEquals(COMPUTING_AMOUNT, (int) jdbcTemplate.queryForObject("SELECT COUNT(*) FROM results", Integer.class));
+        assertEquals(AMOUNT, (int) jdbcTemplate.queryForObject("SELECT COUNT(DISTINCT result) FROM results", Integer.class));
+    }
+
+    @ParameterizedTest
+    @ValueSource(ints = {1, 2, 4})
+    @SneakyThrows
+    void synchronized_amountOfLoadedEqualsExtracted(int threads) {
+        final BatchLoaderSync batchLoader = new BatchLoaderSync(BATCH_SIZE, jdbcTemplate);
+        final ExecutorService executor = Executors.newFixedThreadPool(threads);
+
+        long start = System.currentTimeMillis();
+
+        IntStream.range(0, AMOUNT)    // extract
+                .mapToObj(String::valueOf)      // transform
+                .forEach(i -> executor.execute(() -> batchLoader.load(i))); // load
+
+        executor.shutdown();
+        if (!executor.awaitTermination(5, TimeUnit.MINUTES)) {
+            executor.shutdownNow();
+        }
+
+        batchLoader.finish();
+
+        System.out.println("Duration: " + (System.currentTimeMillis() - start));
+
+        assertEquals(AMOUNT, (int) jdbcTemplate.queryForObject("SELECT COUNT(DISTINCT result) FROM results", Integer.class));
     }
 
     @Test
@@ -82,12 +118,12 @@ class BatchLoaderTest {
 
         long start = System.currentTimeMillis();
 
-        IntStream.range(0, COMPUTING_AMOUNT)    // extract
+        IntStream.range(0, AMOUNT)    // extract
                 .mapToObj(String::valueOf)      // transform
                 .forEach(i -> executor.execute(() -> batchLoader.load(i))); // load
 
         executor.shutdown();
-        if (!executor.awaitTermination(1, TimeUnit.MINUTES)) {
+        if (!executor.awaitTermination(5, TimeUnit.MINUTES)) {
             executor.shutdownNow();
         }
 
@@ -95,7 +131,7 @@ class BatchLoaderTest {
 
         System.out.println("Duration: " + (System.currentTimeMillis() - start));
 
-        assertEquals(COMPUTING_AMOUNT, (int) jdbcTemplate.queryForObject("SELECT COUNT(*) FROM results", Integer.class));
+        assertEquals(AMOUNT, (int) jdbcTemplate.queryForObject("SELECT COUNT(DISTINCT result) FROM results", Integer.class));
     }
 
     @BeforeEach
