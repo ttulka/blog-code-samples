@@ -6,7 +6,7 @@
     "test": "jasmine --config=jasmine.json"
   },
   "devDependencies": {
-    "axios": "^0.18.0",
+    "axios": "^0.18.1",
     "jasmine": "^3.1.0",
     "jasmine-core": "^3.1.0"
   },
