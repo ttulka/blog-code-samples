@@ -9,7 +9,7 @@
     "test": "jasmine"
   },
   "devDependencies": {
-    "axios": "^0.18.0",
+    "axios": "^0.18.1",
     "grunt": "^1.0.3",
     "grunt-aws-lambda-package": "0.0.6",
     "grunt-contrib-clean": "^2.0.0",
