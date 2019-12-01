@@ -2,6 +2,8 @@
 
 A very simple example of a CD pipeline (AWS CodePipeline) implementing the blue-green deployment strategy for test-isolation.
 
+More info: http://blog.ttulka.com/serverless-blue-green-deployment
+
 ## Project Structure
 
 `pipeline`
