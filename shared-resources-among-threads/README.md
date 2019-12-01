@@ -4,4 +4,4 @@
 mvn clean test
 ```
 
-More info: http://blog.ttulka.com/don-t-share-data-among-threads-132
+More info: http://blog.ttulka.com/do-not-share-data-among-threads
