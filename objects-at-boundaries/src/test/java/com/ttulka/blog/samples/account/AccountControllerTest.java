@@ -63,7 +63,7 @@ class AccountControllerTest {
             .basePath("/account").
         when()
             .contentType(ContentType.JSON)
-            .body("{\"Ausername\":\"test\",\"Apassword\":\"pwd1\",\"Aemail\":\"test@example.com\"}")
+            .body("{\"username\":\"test\",\"password\":\"pwd1\",\"email\":\"test@example.com\"}")
             .post().
         then()
             .statusCode(201);
