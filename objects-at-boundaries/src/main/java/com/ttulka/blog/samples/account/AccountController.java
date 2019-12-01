@@ -1,5 +1,7 @@
 package com.ttulka.blog.samples.account;
 
+import java.util.Map;
+
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -19,26 +21,14 @@ class AccountController {
     private final Accounts accounts;
 
     @GetMapping
-    public LoginDTO login(String username, String password) {
+    public Map<String, String> login(String username, String password) {
         Account account = accounts.login(username, password);
-        return new LoginDTO(account.username());
+        return Map.of("username", account.username());
     }
 
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
-    public void register(@RequestBody ToRegisterDTO toRegister) {
-        accounts.register(toRegister.getUsername(), toRegister.getPassword(), toRegister.getEmail());
-    }
-
-    @Value
-    static class LoginDTO {
-        private final String username;
-    }
-
-    @Value
-    static class ToRegisterDTO {
-        private final String username;
-        private final String password;
-        private final String email;
+    public void register(@RequestBody Map<String, String> toRegister) {
+        accounts.register(toRegister.get("username"), toRegister.get("password"), toRegister.get("email"));
     }
 }
