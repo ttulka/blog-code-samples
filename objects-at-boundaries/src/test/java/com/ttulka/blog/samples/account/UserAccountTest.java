@@ -19,7 +19,7 @@ class UserAccountTest {
     void returns_username(@Autowired UserAccountEntries entries) {
         Account account = new UserAccount("test", "test@example.com", "pwd1", entries);
 
-        assertThat(account.getUsername()).isEqualTo("test");
+        assertThat(account.username()).isEqualTo("test");
     }
 
     @Test

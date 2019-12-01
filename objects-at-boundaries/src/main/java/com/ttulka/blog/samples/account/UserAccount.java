@@ -46,7 +46,7 @@ class UserAccount implements Account {
     }
 
     @Override
-    public String getUsername() {
+    public String username() {
         return username;
     }
 

@@ -10,7 +10,7 @@ public interface Account {
      *
      * @return the username
      */
-    String getUsername();
+    String username();
 
     /**
      * Registers the Account.
