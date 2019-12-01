@@ -2,7 +2,7 @@
 
 Source code for the example web application "Package by Component with Clean Modules in Java".
 
-More info http://blog.net21.cz/package-by-component-with-clean-modules-in-java-122
+More info http://blog.ttulka.com/package-by-component-with-clean-modules-in-java
 
 ## Build
 ```
