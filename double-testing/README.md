@@ -2,7 +2,7 @@
 
 Write your tests once and run them twice - as both unit and integration tests.
 
-Source code for http://blog.ttulka.com/double-testing-130
+Source code for http://blog.ttulka.com/double-testing
 
 ## Unit Phase
 ```
