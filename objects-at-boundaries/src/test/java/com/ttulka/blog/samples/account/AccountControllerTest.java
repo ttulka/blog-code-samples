@@ -2,11 +2,8 @@ package com.ttulka.blog.samples.account;
 
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
-import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.web.server.LocalServerPort;
-import org.springframework.context.annotation.Configuration;
-import org.springframework.context.annotation.Import;
 import org.springframework.test.annotation.DirtiesContext;
 
 import io.restassured.RestAssured;
@@ -15,9 +12,7 @@ import io.restassured.http.ContentType;
 import static io.restassured.RestAssured.with;
 import static org.hamcrest.CoreMatchers.is;
 
-@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT,
-        classes = AccountControllerTest.TestConfig.class)
-@EnableAutoConfiguration
+@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 class AccountControllerTest {
 
     @LocalServerPort
@@ -67,10 +62,5 @@ class AccountControllerTest {
             .post().
         then()
             .statusCode(201);
-    }
-
-    @Configuration
-    @Import({AccountController.class, UserAccounts.class})
-    static class TestConfig {
     }
 }
