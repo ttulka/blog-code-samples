@@ -15,7 +15,7 @@ import lombok.AllArgsConstructor;
 import lombok.NoArgsConstructor;
 
 @Repository
-interface UserAccountEntries extends CrudRepository<UserAccountEntries.Entry, Long> {
+interface AccountEntries extends CrudRepository<AccountEntries.Entry, Long> {
 
     Optional<Entry> findByUsername(String username);
 

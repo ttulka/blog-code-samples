@@ -12,7 +12,7 @@ public class AccountApplication {
     }
 
     @Bean
-    Accounts accounts(UserAccountEntries entries) {
-        return new UserAccounts(entries);
+    Accounts accounts(AccountEntries entries) {
+        return new PersistentAccounts(entries);
     }
 }

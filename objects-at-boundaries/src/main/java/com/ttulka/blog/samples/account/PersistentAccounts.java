@@ -4,16 +4,16 @@ import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 
 @RequiredArgsConstructor
-class UserAccounts implements Accounts {
+class PersistentAccounts implements Accounts {
 
-    private final UserAccountEntries entries;
+    private final AccountEntries entries;
 
     @Override
     public Account register(@NonNull String username, @NonNull String password, @NonNull String email) {
         if (entries.findByUsername(username).isPresent()) {
             throw new AccountException("Username already exists: " + username);
         }
-        Account account = new UserAccount(username, email, password, entries);
+        Account account = new PersistentAccount(username, email, password, entries);
         account.register();
         account.login();
         return account;
@@ -31,7 +31,7 @@ class UserAccounts implements Accounts {
 
     private Account registeredAccountByUsername(String username) {
         return entries.findByUsername(username)
-                .map(entry -> new UserAccount(
+                .map(entry -> new PersistentAccount(
                         entry.id, entry.username, entry.email, entry.encryptedPassword, entry.salt, entry.lastLoggedIn,
                         entries))
                 .orElseThrow(() -> new AccountException("Not found: " + username));
