@@ -16,12 +16,6 @@ public class Paycheck {
      * @return the amount
      */
     public double amount() {
-        if (employee instanceof Manager) {
-            return 2000.0;
-        }
-        if (employee instanceof Developer) {
-            return 1000.0;
-        }
-        return 0.0;
+        return employee.salary();
     }
 }
