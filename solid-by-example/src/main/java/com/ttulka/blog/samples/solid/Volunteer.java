@@ -8,6 +8,6 @@ public class Volunteer extends Employee {
 
     @Override
     public double salary() {
-        throw new RuntimeException("No salary for volunteers!");
+        return 0.0;
     }
 }
