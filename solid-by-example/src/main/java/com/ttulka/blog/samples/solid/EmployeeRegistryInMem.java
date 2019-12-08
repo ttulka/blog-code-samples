@@ -1,19 +1,19 @@
 package com.ttulka.blog.samples.solid;
 
-import java.util.HashMap;
-import java.util.Map;
+import java.util.HashSet;
+import java.util.Set;
 
 class EmployeeRegistryInMem implements EmployeeRegistry {
 
-    private final static Map<String, Employee> map = new HashMap<>();
+    private final static Set<Employee> mem = new HashSet<>();
 
     @Override
     public void register(Employee employee) {
-        map.put(employee.personalId, employee);
+        mem.add(employee);
     }
 
     @Override
     public boolean isRegistered(Employee employee) {
-        return map.containsKey(employee.personalId);
+        return mem.contains(employee);
     }
 }

@@ -11,24 +11,28 @@ class VolunteerTest {
     @Test
     void full_name_is_provided() {
         Volunteer volunteer = new Volunteer(
-                UUID.randomUUID().toString(), "John", "Smith", new EmployeeRegistryInMem());
+                UUID.randomUUID().toString(), "John", "Smith");
 
         assertThat(volunteer.fullName()).isEqualTo("John Smith");
     }
 
     @Test
-    void employee_is_registered() {
-        Volunteer volunteer = new Volunteer(
-                UUID.randomUUID().toString(), "John", "Smith", new EmployeeRegistryInMem());
+    void is_registered() {
+        RegistrableEmployee volunteer = new RegistrableEmployee(
+                new Volunteer(UUID.randomUUID().toString(), "John", "Smith"),
+                new EmployeeRegistryInMem()
+        );
         volunteer.register();
 
         assertThat(volunteer.isRegistered()).isTrue();
     }
 
     @Test
-    void employee_is_not_registered() {
-        Volunteer volunteer = new Volunteer(
-                UUID.randomUUID().toString(), "John", "Smith", new EmployeeRegistryInMem());
+    void is_not_registered() {
+        RegistrableEmployee volunteer = new RegistrableEmployee(
+                new Volunteer(UUID.randomUUID().toString(), "John", "Smith"),
+                new EmployeeRegistryInMem()
+        );
 
         assertThat(volunteer.isRegistered()).isFalse();
     }

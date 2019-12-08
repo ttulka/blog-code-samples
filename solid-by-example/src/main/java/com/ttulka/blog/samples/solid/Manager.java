@@ -1,9 +1,9 @@
 package com.ttulka.blog.samples.solid;
 
-public class Manager extends Employee implements PayedEmployee {
+public class Manager extends BaseEmployee implements PayedEmployee {
 
-    public Manager(String personalId, String firstName, String lastName, EmployeeRegistry registry) {
-        super(personalId, firstName, lastName, registry);
+    public Manager(String personalId, String firstName, String lastName) {
+        super(personalId, firstName, lastName);
     }
 
     @Override

@@ -1,6 +1,6 @@
 package com.ttulka.blog.samples.solid;
 
-public interface PayedEmployee {
+public interface PayedEmployee extends Employee {
 
     /**
      * Returns salary for the employee.
