@@ -22,12 +22,4 @@ class PaycheckTest {
         );
         assertThat(paycheck.amount()).isCloseTo(1000.00, within(0.0));
     }
-
-    @Test
-    void volunteer_earns_nothing() {
-        Paycheck paycheck = new Paycheck(
-                new Volunteer("01", "First", "Last")
-        );
-        assertThat(paycheck.amount()).isCloseTo(0.00, within(0.0));
-    }
 }

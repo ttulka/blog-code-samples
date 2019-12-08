@@ -2,12 +2,12 @@ package com.ttulka.blog.samples.solid;
 
 public class Paycheck {
 
-    private final Employee employee;
+    private final PayedEmployee employee;
 
     /**
      * @param employee the employee the paycheck is for
      */
-    public Paycheck(Employee employee) {
+    public Paycheck(PayedEmployee employee) {
         this.employee = employee;
     }
 

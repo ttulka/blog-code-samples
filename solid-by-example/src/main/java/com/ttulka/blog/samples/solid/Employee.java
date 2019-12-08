@@ -22,12 +22,6 @@ public abstract class Employee {
     }
 
     /**
-     * Returns salary for the employee.
-     * @return the salary
-     */
-    public abstract double salary();
-
-    /**
      * Returns the full name of the employee.
      *
      * @return the full name of the employee
