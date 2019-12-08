@@ -5,9 +5,11 @@ import java.util.stream.Stream;
 public class Application {
 
     public static void main(String[] args) {
-        Manager manager = new Manager("000", "Monty", "Burns");
-        Developer developer = new Developer("001", "Martin", "Prince");
-        Volunteer volunteer = new Volunteer("003", "Lisa", "Simpson");
+        EmployeeRegistry registry = new EmployeeRegistryInMem();
+
+        Manager manager = new Manager("000", "Monty", "Burns", registry);
+        Developer developer = new Developer("001", "Martin", "Prince", registry);
+        Volunteer volunteer = new Volunteer("003", "Lisa", "Simpson", registry);
 
         manager.register();
         developer.register();

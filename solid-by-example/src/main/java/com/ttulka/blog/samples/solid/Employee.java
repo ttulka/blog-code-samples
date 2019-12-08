@@ -4,7 +4,7 @@ import java.util.Objects;
 
 public abstract class Employee {
 
-    private final static EmployeeRegistry registry = new EmployeeRegistry();
+    private final EmployeeRegistry registry;
 
     protected final String personalId;
     protected final String firstName;
@@ -15,10 +15,11 @@ public abstract class Employee {
      * @param firstName  the first name
      * @param lastName   the last name
      */
-    public Employee(String personalId, String firstName, String lastName) {
+    public Employee(String personalId, String firstName, String lastName, EmployeeRegistry registry) {
         this.personalId = personalId;
         this.firstName = firstName;
         this.lastName = lastName;
+        this.registry = registry;
     }
 
     /**

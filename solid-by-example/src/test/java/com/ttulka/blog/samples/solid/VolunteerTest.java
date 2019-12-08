@@ -10,14 +10,16 @@ class VolunteerTest {
 
     @Test
     void full_name_is_provided() {
-        Volunteer volunteer = new Volunteer(UUID.randomUUID().toString(), "John", "Smith");
+        Volunteer volunteer = new Volunteer(
+                UUID.randomUUID().toString(), "John", "Smith", new EmployeeRegistryInMem());
 
         assertThat(volunteer.fullName()).isEqualTo("John Smith");
     }
 
     @Test
     void employee_is_registered() {
-        Volunteer volunteer = new Volunteer(UUID.randomUUID().toString(), "John", "Smith");
+        Volunteer volunteer = new Volunteer(
+                UUID.randomUUID().toString(), "John", "Smith", new EmployeeRegistryInMem());
         volunteer.register();
 
         assertThat(volunteer.isRegistered()).isTrue();
@@ -25,7 +27,8 @@ class VolunteerTest {
 
     @Test
     void employee_is_not_registered() {
-        Volunteer volunteer = new Volunteer(UUID.randomUUID().toString(), "John", "Smith");
+        Volunteer volunteer = new Volunteer(
+                UUID.randomUUID().toString(), "John", "Smith", new EmployeeRegistryInMem());
 
         assertThat(volunteer.isRegistered()).isFalse();
     }

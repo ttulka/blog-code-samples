@@ -10,14 +10,16 @@ class DeveloperTest {
 
     @Test
     void full_name_is_provided() {
-        Developer developer = new Developer(UUID.randomUUID().toString(), "John", "Smith");
+        Developer developer = new Developer(
+                UUID.randomUUID().toString(), "John", "Smith", new EmployeeRegistryInMem());
 
         assertThat(developer.fullName()).isEqualTo("John Smith");
     }
 
     @Test
     void employee_is_registered() {
-        Developer developer = new Developer(UUID.randomUUID().toString(), "John", "Smith");
+        Developer developer = new Developer(
+                UUID.randomUUID().toString(), "John", "Smith", new EmployeeRegistryInMem());
         developer.register();
 
         assertThat(developer.isRegistered()).isTrue();
@@ -25,7 +27,8 @@ class DeveloperTest {
 
     @Test
     void employee_is_not_registered() {
-        Developer developer = new Developer(UUID.randomUUID().toString(), "John", "Smith");
+        Developer developer = new Developer(
+                UUID.randomUUID().toString(), "John", "Smith", new EmployeeRegistryInMem());
 
         assertThat(developer.isRegistered()).isFalse();
     }
