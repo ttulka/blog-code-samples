@@ -1,12 +1,10 @@
 package com.ttulka.blog.samples.solid;
 
-import java.util.HashMap;
-import java.util.Map;
 import java.util.Objects;
 
 public abstract class Employee {
 
-    private final static Map<String, Employee> registry = new HashMap<>();
+    private final static EmployeeRegistry registry = new EmployeeRegistry();
 
     protected final String personalId;
     protected final String firstName;
@@ -14,8 +12,8 @@ public abstract class Employee {
 
     /**
      * @param personalId the personal ID
-     * @param firstName the first name
-     * @param lastName the last name
+     * @param firstName  the first name
+     * @param lastName   the last name
      */
     public Employee(String personalId, String firstName, String lastName) {
         this.personalId = personalId;
@@ -25,6 +23,7 @@ public abstract class Employee {
 
     /**
      * Returns the full name of the employee.
+     *
      * @return the full name of the employee
      */
     public String fullName() {
@@ -35,15 +34,16 @@ public abstract class Employee {
      * Registers the employee.
      */
     public void register() {
-        registry.put(personalId, this);
+        registry.register(this);
     }
 
     /**
      * Is the employee registered?
+     *
      * @return true if the employee is registered, false otherwise
      */
     public boolean isRegistered() {
-        return registry.containsKey(personalId);
+        return registry.isRegistered(this);
     }
 
     @Override
