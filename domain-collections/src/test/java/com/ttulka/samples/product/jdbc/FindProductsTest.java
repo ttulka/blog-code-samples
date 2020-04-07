@@ -1,9 +1,12 @@
 package com.ttulka.samples.product.jdbc;
 
+import java.util.stream.Collectors;
+
 import com.ttulka.samples.product.Code;
 import com.ttulka.samples.product.FindProducts;
 import com.ttulka.samples.product.Money;
 import com.ttulka.samples.product.Product;
+import com.ttulka.samples.product.Products;
 import com.ttulka.samples.product.Title;
 
 import org.junit.jupiter.api.Test;
@@ -27,10 +30,33 @@ class FindProductsTest {
 
     @Test
     void products_cheaper_than_an_amount_of_money_are_found() {
-        var products = findProducts.cheaperThan(new Money(3.00));
+        var products = findProducts.cheaperThan(new Money(3.00))
+                .asStream().collect(Collectors.toList());
 
         assertThat(products).containsExactly(
                 new Product(new Code("002"), new Title("B"), new Money(2.50)),
                 new Product(new Code("003"), new Title("C"), new Money(1.00)));
+    }
+
+    @Test
+    void products_are_sorted_by_title() {
+        var products = findProducts.cheaperThan(new Money(3.00))
+                .sorted(Products.SortBy.TITLE)
+                .asStream().collect(Collectors.toList());
+
+        assertThat(products).containsExactly(
+                new Product(new Code("002"), new Title("B"), new Money(2.50)),
+                new Product(new Code("003"), new Title("C"), new Money(1.00)));
+    }
+
+    @Test
+    void products_are_sorted_by_price() {
+        var products = findProducts.cheaperThan(new Money(3.00))
+                .sorted(Products.SortBy.PRICE)
+                .asStream().collect(Collectors.toList());
+
+        assertThat(products).containsExactly(
+                new Product(new Code("003"), new Title("C"), new Money(1.00)),
+                new Product(new Code("002"), new Title("B"), new Money(2.50)));
     }
 }
