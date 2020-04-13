@@ -22,8 +22,8 @@ final class FindCustomerJdbc implements FindCustomer {
         return jdbcTemplate.queryForList(
                 "SELECT firstName, lastName, email FROM customers WHERE email = ?", email.value())
                 .stream()
-                .map(this::toCustomer)
                 .findAny()
+                .map(this::toCustomer)
                 .orElseGet(this::customerNotFound);
     }
 

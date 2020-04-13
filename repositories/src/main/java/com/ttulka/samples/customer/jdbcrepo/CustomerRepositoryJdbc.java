@@ -24,8 +24,8 @@ final class CustomerRepositoryJdbc implements FindCustomer, RegisterCustomer {
         return jdbcTemplate.queryForList(
                 "SELECT firstName, lastName, email FROM customers WHERE email = ?", email.value())
                 .stream()
-                .map(this::toCustomer)
                 .findAny()
+                .map(this::toCustomer)
                 .orElseGet(this::customerNotFound);
     }
 
