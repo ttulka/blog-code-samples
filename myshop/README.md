@@ -1,4 +1,4 @@
-# MyShop
+# Package by Component with Clean Modules in Java: MyShop example
 
 Source code for the example web application "Package by Component with Clean Modules in Java".
 
