@@ -1,6 +1,6 @@
-package com.ttulka.blog.samples.monolithic;
+package com.ttulka.blog.samples.monolithic.product;
 
-final class Money {
+public final class Money {
 
     private final double value;
 

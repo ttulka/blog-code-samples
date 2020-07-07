@@ -1,6 +1,6 @@
-package com.ttulka.blog.samples.monolithic;
+package com.ttulka.blog.samples.monolithic.product;
 
-final class Title {
+public final class Title {
 
     private final String value;
 
