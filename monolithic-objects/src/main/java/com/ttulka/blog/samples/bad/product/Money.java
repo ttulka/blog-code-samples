@@ -1,5 +1,8 @@
-package com.ttulka.blog.samples.monolithic.product;
+package com.ttulka.blog.samples.bad.product;
 
+import lombok.EqualsAndHashCode;
+
+@EqualsAndHashCode
 public final class Money {
 
     private final double value;

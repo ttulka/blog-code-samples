@@ -1,29 +1,33 @@
-package com.ttulka.blog.samples.monolithic.product.jdbc;
+package com.ttulka.blog.samples.bad.product.jdbc;
 
-import com.ttulka.blog.samples.monolithic.product.Availability;
-import com.ttulka.blog.samples.monolithic.product.Money;
-import com.ttulka.blog.samples.monolithic.product.Product;
-import com.ttulka.blog.samples.monolithic.product.Title;
+import com.ttulka.blog.samples.bad.product.*;
+import lombok.EqualsAndHashCode;
 import org.springframework.jdbc.core.JdbcTemplate;
 
+@EqualsAndHashCode(of = "id")
 class ProductJdbc implements Product {
 
-    private final Long id;
+    private final ProductId id;
     private Title title;
     private Money price;
     private Availability availability;
 
-    private final JdbcTemplate jdbcTemplate;
+    private final JdbcTemplate jdbc;
 
     public ProductJdbc(
-            Long id,
+            ProductId id,
             Title title, Money price, Availability availability,
             JdbcTemplate jdbcTemplate) {
         this.id = id;
         this.title = title;
         this.price = price;
         this.availability = availability;
-        this.jdbcTemplate = jdbcTemplate;
+        this.jdbc = jdbcTemplate;
+    }
+
+    @Override
+    public ProductId id() {
+        return id;
     }
 
     @Override
@@ -43,15 +47,15 @@ class ProductJdbc implements Product {
 
     @Override
     public void changeTitle(Title newTitle) {
-        jdbcTemplate.update("UPDATE products SET title = ? WHERE id = ?",
-                newTitle.value(), id);
+        jdbc.update("UPDATE products SET title = ? WHERE id = ?",
+                newTitle.value(), id.value());
         title = newTitle;
     }
 
     @Override
     public void changePrice(Money newPrice) {
-        jdbcTemplate.update("UPDATE products SET price = ? WHERE id = ?",
-                newPrice.value(), id);
+        jdbc.update("UPDATE products SET price = ? WHERE id = ?",
+                newPrice.value(), id.value());
         price = newPrice;
     }
 }
