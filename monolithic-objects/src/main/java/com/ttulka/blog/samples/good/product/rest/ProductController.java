@@ -1,14 +1,17 @@
-package com.ttulka.blog.samples.bad.product.rest;
+package com.ttulka.blog.samples.good.product.rest;
 
 import java.util.Collection;
 import java.util.Map;
 import java.util.stream.Collectors;
 
-import com.ttulka.blog.samples.bad.product.Money;
-import com.ttulka.blog.samples.bad.product.Product;
-import com.ttulka.blog.samples.bad.product.ProductId;
-import com.ttulka.blog.samples.bad.product.Products;
-import com.ttulka.blog.samples.bad.product.Title;
+import com.ttulka.blog.samples.good.product.ChangeProductPrice;
+import com.ttulka.blog.samples.good.product.ChangeProductTitle;
+import com.ttulka.blog.samples.good.product.FindProduct;
+import com.ttulka.blog.samples.good.product.ListAllProducts;
+import com.ttulka.blog.samples.good.product.Money;
+import com.ttulka.blog.samples.good.product.Product;
+import com.ttulka.blog.samples.good.product.ProductId;
+import com.ttulka.blog.samples.good.product.Title;
 
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -24,30 +27,31 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 class ProductController {
 
-    private final Products products;
+    private final ListAllProducts allProducts;
+    private final FindProduct findProduct;
+    private final ChangeProductTitle changeTitle;
+    private final ChangeProductPrice changePrice;
 
     @GetMapping
     public Collection<Map<String, ?>> list() {
-        return products.listAll().stream()
+        return allProducts.list().stream()
                 .map(this::toData)
                 .collect(Collectors.toList());
     }
 
     @GetMapping("{id}")
     public Map<String, ?> find(@PathVariable Long id) {
-        return toData(products.findById(new ProductId(id)));
+        return toData(findProduct.byId(new ProductId(id)));
     }
 
     @PutMapping("{id}/title")
     public void changeTitle(@PathVariable Long id, @RequestBody String title) {
-        products.findById(new ProductId(id))
-                .changeTitle(new Title(title));
+        changeTitle.change(new ProductId(id), new Title(title));
     }
 
     @PutMapping("{id}/price")
     public void changePrice(@PathVariable Long id, @RequestBody Double price) {
-        products.findById(new ProductId(id))
-                .changePrice(new Money(price));
+        changePrice.change(new ProductId(id), new Money(price));
     }
 
     private Map<String, ?> toData(Product p) {

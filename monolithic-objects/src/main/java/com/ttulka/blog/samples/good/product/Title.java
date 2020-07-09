@@ -1,4 +1,4 @@
-package com.ttulka.blog.samples.bad.product;
+package com.ttulka.blog.samples.good.product;
 
 import lombok.EqualsAndHashCode;
 import lombok.NonNull;

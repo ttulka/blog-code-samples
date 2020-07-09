@@ -1,4 +1,4 @@
-package com.ttulka.blog.samples.bad.product;
+package com.ttulka.blog.samples.good.product;
 
 import lombok.EqualsAndHashCode;
 
@@ -14,7 +14,7 @@ public final class ProductId {
         this.value = value;
     }
 
-    public long value() {
+    public Long value() {
         return value;
     }
 }

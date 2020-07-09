@@ -4,7 +4,7 @@ import java.util.Collection;
 
 public interface Products {
 
-    Collection<Product> findAll();
+    Collection<Product> listAll();
 
     Product findById(ProductId id);
 }

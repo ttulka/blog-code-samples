@@ -1,21 +1,28 @@
 package com.ttulka.blog.samples.bad.product.jdbc;
 
-import com.ttulka.blog.samples.bad.product.*;
-import lombok.RequiredArgsConstructor;
-import org.springframework.jdbc.core.JdbcTemplate;
-import org.springframework.stereotype.Component;
-
 import java.util.Collection;
 import java.util.stream.Collectors;
 
+import com.ttulka.blog.samples.bad.product.Availability;
+import com.ttulka.blog.samples.bad.product.Money;
+import com.ttulka.blog.samples.bad.product.Product;
+import com.ttulka.blog.samples.bad.product.ProductId;
+import com.ttulka.blog.samples.bad.product.Products;
+import com.ttulka.blog.samples.bad.product.Title;
+
+import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.stereotype.Component;
+
+import lombok.RequiredArgsConstructor;
+
 @Component
 @RequiredArgsConstructor
-public class ProductsJdbc implements Products {
+class ProductsJdbc implements Products {
 
     private final JdbcTemplate jdbc;
 
     @Override
-    public Collection<Product> findAll() {
+    public Collection<Product> listAll() {
         return jdbc.queryForList("SELECT id, title, price, availability FROM products")
                 .stream()
                 .map(r -> new ProductJdbc(
@@ -40,14 +47,17 @@ public class ProductsJdbc implements Products {
                         Availability.valueOf((String)r.get("availability")),
                         jdbc))
                 .findFirst()
-                .orElseGet(ProductNull::new);
+                .orElseGet(() -> new ProductNotFound(id));
     }
 
-    static class ProductNull implements Product {
+    @RequiredArgsConstructor
+    static class ProductNotFound implements Product {
+
+        private final ProductId id;
 
         @Override
         public ProductId id() {
-            return new ProductId(Long.MAX_VALUE);
+            return id;
         }
 
         @Override
