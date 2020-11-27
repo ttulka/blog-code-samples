@@ -1,0 +1,64 @@
+plugins {
+	id 'org.springframework.boot' version '2.4.0'
+	id 'io.spring.dependency-management' version '1.0.10.RELEASE'
+	id 'java'
+}
+
+group = 'com.ttulka.blog.samples'
+version = '1.0.0-SNAPSHOT'
+
+dependencies {
+	compileOnly 'org.projectlombok:lombok'
+	annotationProcessor 'org.projectlombok:lombok'
+
+	implementation 'org.springframework.boot:spring-boot-starter'
+	implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
+	implementation 'org.springframework.boot:spring-boot-starter-web'
+
+	runtimeOnly 'com.h2database:h2'
+
+	testImplementation 'org.springframework.boot:spring-boot-starter-test'
+	testImplementation 'io.rest-assured:rest-assured'
+
+	testCompile 'org.testcontainers:testcontainers:1.15.0'
+	testCompile 'org.testcontainers:junit-jupiter:1.15.0'
+}
+
+bootJar {
+	archiveName 'application.jar'
+}
+
+java {
+	sourceCompatibility = JavaVersion.VERSION_11
+}
+
+test {
+	useJUnitPlatform()
+
+	filter {
+		excludeTestsMatching '*E2E'
+	}
+}
+
+task integrationTest(type: Test) {
+	description = 'Runs integration tests.'
+	group = 'verification'
+
+	shouldRunAfter test
+}
+
+integrationTest {
+	useJUnitPlatform()
+
+	filter {
+		includeTestsMatching '*E2E'
+	}
+
+	dependsOn bootJar
+}
+
+check.dependsOn integrationTest
+
+repositories {
+	mavenCentral()
+}
