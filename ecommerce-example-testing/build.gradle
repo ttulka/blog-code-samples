@@ -36,7 +36,7 @@ test {
 	useJUnitPlatform()
 
 	filter {
-		excludeTestsMatching '*E2E'
+		includeTestsMatching '*Test'
 	}
 }
 
@@ -44,20 +44,31 @@ task integrationTest(type: Test) {
 	description = 'Runs integration tests.'
 	group = 'verification'
 
-	shouldRunAfter test
-}
-
-integrationTest {
 	useJUnitPlatform()
 
 	filter {
-		includeTestsMatching '*E2E'
+		includeTestsMatching '*TestIT'
+	}
+
+	shouldRunAfter test
+}
+
+task end2endTest(type: Test) {
+	description = 'Runs end-to-end tests.'
+	group = 'verification'
+
+	useJUnitPlatform()
+
+	filter {
+		includeTestsMatching '*TestE2E'
 	}
 
 	dependsOn bootJar
+
+	shouldRunAfter integrationTest
 }
 
-check.dependsOn integrationTest
+check.dependsOn(integrationTest, end2endTest)
 
 repositories {
 	mavenCentral()
