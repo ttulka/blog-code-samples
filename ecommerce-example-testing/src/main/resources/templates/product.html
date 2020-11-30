@@ -1,0 +1,48 @@
+<!DOCTYPE HTML>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>Products</title>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+</head>
+<body>
+
+<h1>Products</h1>
+
+<h2>Standard Products</h2>
+<table id="products-list__standard" border="1">
+    <tr><th>ID</th><th>Name</th><th>Price</th></tr>
+    <tr th:each="p : ${standards}" class="product">
+        <td th:text="${p.id}" class="id"></td>
+        <td th:text="${p.name}" class="name"></td>
+        <td th:text="${p.price}" class="price"></td>
+    </tr>
+</table>
+
+<h2>Promo Products</h2>
+<table id="products-list__promo" border="1">
+    <tr><th>ID</th><th>Name</th><th>Price</th></tr>
+    <tr th:each="p : ${promos}" class="product">
+        <td th:text="${p.id}" class="id"></td>
+        <td th:text="${p.name}" class="name"></td>
+        <td th:text="${p.price}" class="price"></td>
+    </tr>
+</table>
+
+<hr />
+
+<h2>Put Product On Sale</h2>
+<form action="/ui/products/sale" method="post" id="form-sale">
+    <label>Name:</label> <input name="name" class="name" /><br />
+    <label>Price:</label> <input name="price" class="price" /><br />
+    <button type="submit" class="submit">Submit</button>
+</form>
+
+<h2>Promote Product</h2>
+<form action="/ui/products/promote" method="post" id="form-promote">
+    <label>Name:</label> <input name="name" class="name" /><br />
+    <label>Price:</label> <input name="price" class="price" /><br />
+    <button type="submit" class="submit">Submit</button>
+</form>
+
+</body>
+</html>

@@ -2,26 +2,21 @@
 
 A sample project to demonstrate various kinds of tests.
 
-## Run all tests 
+## Run Tests
 
 ```sh
+# Run all tests 
 ./gradlew check
-```
 
-## Run only unit + component tests
-
-```sh
+# Run only unit + component tests
 ./gradlew test
-``` 
 
-## Run only integration tests
-
-```sh
+# Run only integration tests
 ./gradlew integrationTest
-```
 
-## Run only end-to-end tests
-
-```sh
+# Run only end-to-end tests
 ./gradlew end2endTest
+
+# Run only UI tests
+./gradlew uiTest
 ```

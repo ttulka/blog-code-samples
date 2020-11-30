@@ -33,7 +33,7 @@ class ProductsTestE2E {
     private int port;
 
     @BeforeEach
-    public void setUp() {
+    void setUp() {
         port = application.getFirstMappedPort();
     }
 

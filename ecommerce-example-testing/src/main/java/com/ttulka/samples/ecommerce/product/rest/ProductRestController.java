@@ -21,11 +21,11 @@ import lombok.RequiredArgsConstructor;
 @RestController
 @RequestMapping("/products")
 @RequiredArgsConstructor
-class ProductController {
+class ProductRestController {
 
     private final @NonNull FindProducts findProducts;
-    private final @NonNull Promote promote;
     private final @NonNull PutOnSale putOnSale;
+    private final @NonNull Promote promote;
 
     @GetMapping("/standard")
     public Collection<ProductResponse> standard() {
