@@ -1,0 +1,13 @@
+{
+  "architecture": "amd64",
+  "os": "linux",
+  "config": {
+    "Env": ["PATH=/bin"],
+    "Entrypoint": ["penguinshell"]
+  },
+  "rootfs": {
+    "type": "layers",
+    "diff_ids": ["sha256:337196fe35f184daaf208697245677eaae5cd6b694497001d22af629024443a7"]
+  }
+}
+
