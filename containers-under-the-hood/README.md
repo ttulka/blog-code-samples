@@ -6,7 +6,7 @@ Simple shell script to create a BusyBox-based container under Linux with primiti
 
 Must by run as a superuser.
 
-```sh
+```
 ./container.sh [-m <memory-limit-in-bytes>]
 ```
 
@@ -14,7 +14,7 @@ Must by run as a superuser.
 
 Run a new container with memory limited to 7 MB:
 
-```sh
+```
 $ sudo ./container.sh -m 7340032
 / # busybox echo Hello from a container!
 Hello from a container!
