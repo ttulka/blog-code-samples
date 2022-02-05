@@ -4,42 +4,43 @@ import com.ttulka.blog.txevents.payment.event.PaymentApplied;
 import com.ttulka.blog.txevents.payment.event.PaymentIssued;
 import com.ttulka.blog.txevents.payment.event.PaymentValidated;
 import lombok.RequiredArgsConstructor;
-import org.springframework.amqp.rabbit.core.RabbitTemplate;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class PaymentService {
 
-    private final RabbitTemplate rabbitTemplate;
+    private final ApplicationEventPublisher eventPublisher;
 
     @Transactional
     public void collectPayment(Payment payment) {
         issuePayment(payment);
-        rabbitTemplate.convertAndSend("paymentQueue",
-                new PaymentIssued(payment).toString());
+        eventPublisher.publishEvent(new PaymentIssued(payment));
 
         validatePayment(payment);
-        rabbitTemplate.convertAndSend("paymentQueue",
-                new PaymentValidated(payment).toString());
+        eventPublisher.publishEvent(new PaymentValidated(payment));
 
         applyPayment(payment);
-        rabbitTemplate.convertAndSend("paymentQueue",
-                new PaymentApplied(payment).toString());
+        eventPublisher.publishEvent(new PaymentApplied(payment));
     }
 
     private void issuePayment(Payment payment) {
-        // issuing the payment...
-
+        log.info("issuing the payment: {}", payment);
+        // ...
     }
 
     private void validatePayment(Payment payment) {
-        // validating the payment...
+        log.info("validating the payment: {}", payment);
+        // ...
     }
 
     private void applyPayment(Payment payment) {
-        // applying the payment
+        log.info("applying the payment: {}", payment);
+        // ...
         throw new RuntimeException("Oops!");
     }
 }
