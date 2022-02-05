@@ -1,18 +1,12 @@
 package com.ttulka.blog.txevents.payment.event;
 
 import com.ttulka.blog.txevents.payment.Payment;
-import lombok.Value;
+import lombok.ToString;
 
-import java.time.ZonedDateTime;
-
-@Value
-public class PaymentIssued {
+@ToString(callSuper = true)
+public class PaymentIssued extends PaymentEvent {
 
     public PaymentIssued(Payment payment) {
-        this.reference = payment.getReference();
-        this.at = ZonedDateTime.now();
+        super(payment);
     }
-
-    private final String reference;
-    private final ZonedDateTime at;
 }

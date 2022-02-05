@@ -6,10 +6,10 @@ import org.springframework.stereotype.Component;
 
 @Component
 @Slf4j
-class PaymentListener {
+class PaymentAudit {
 
     @RabbitListener(queues = "paymentQueue")
-    public void listen(String msg) {
-        log.info("Event received: {}", msg);
+    public void listen(String event) {
+        log.info("Event received: {}", event);
     }
 }
