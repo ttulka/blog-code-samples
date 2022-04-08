@@ -1,6 +1,6 @@
 # Project to demonstrate ORM pitfalls
 
-See more at https://blog.ttulka.com/data-vs-domain-model/
+See more at https://blog.ttulka.com/data-model-vs-domain-model/
 
 ## Run
 ```sh
